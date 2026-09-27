@@ -72,6 +72,6 @@ onUnauthorized(() => {
     <component :is="layout">
       <RouterView />
     </component>
-    <Toaster rich-colors position="top-right" :container-aria-label="$t('ui.notifications')" />
+    <Toaster rich-colors position="bottom-right" :container-aria-label="$t('ui.notifications')" />
   </TooltipProvider>
 </template>
