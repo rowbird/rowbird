@@ -73,7 +73,7 @@ func TestConformance(t *testing.T) {
 				INSERT INTO rb_rows VALUES (1),(2),(3),(4),(5),(6),(7),(8),(9),(10);`,
 			} {
 				_, err := db.ExecContext(ctx, stmt)
-				connectortest.Must(t, err, stmt[:20])
+				connectortest.Must(t, err, stmt[:min(len(stmt), 20)])
 			}
 		},
 		Types: []connectortest.ExpectedColumn{

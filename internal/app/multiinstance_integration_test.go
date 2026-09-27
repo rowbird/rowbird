@@ -93,7 +93,7 @@ func TestInstancesShareAPostgresStore(t *testing.T) {
 	fmt.Fprintf(&yaml, "apiVersion: rowbird.dev/v1\nkind: Connection\nmetadata: {name: shop}\nspec: {driver: sqlite, config: {path: %q}}\n", shop)
 	const reports = 12
 	for i := range reports {
-		fmt.Fprintf(&yaml, "---\napiVersion: rowbird.dev/v1\nkind: Report\nmetadata: {name: r%d}\nspec:\n  query: {connection: shop, sql: \"WITH RECURSIVE c(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM c WHERE x < 300000) SELECT COUNT(*) AS n FROM c\"}\n  schedule: {cron: \"0 3 * * *\", timezone: UTC}\n  run: {retryMax: 1, retryBackoffSeconds: 1}\n", i)
+		fmt.Fprintf(&yaml, "---\napiVersion: rowbird.dev/v1\nkind: Report\nmetadata: {name: r%d}\nspec:\n  query: {connection: shop, sql: \"WITH RECURSIVE c(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM c WHERE x < 60000) SELECT COUNT(*) AS n FROM c\"}\n  schedule: {cron: \"0 3 * * *\", timezone: UTC}\n  run: {retryMax: 1, retryBackoffSeconds: 1}\n", i)
 	}
 	docs, err := gitops.Parse("reports.yaml", []byte(yaml.String()))
 	if err != nil {
@@ -121,7 +121,8 @@ func TestInstancesShareAPostgresStore(t *testing.T) {
 		t.Fatal(err)
 	}
 	var runs []store.Run
-	deadline := time.Now().Add(60 * time.Second)
+	// Generous: CI machines are small and the race detector slows every run several times over.
+	deadline := time.Now().Add(3 * time.Minute)
 	for {
 		page, err := a1.store.Runs().List(ctx, store.RunFilter{}, store.PageRequest{Limit: 100})
 		if err != nil {
