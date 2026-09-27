@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	mssqldb "github.com/microsoft/go-mssqldb"
+
 	"github.com/rowbird/rowbird/internal/plugin"
 )
 
@@ -63,6 +65,19 @@ func TestConvert(t *testing.T) {
 		}
 		if got != tc.want {
 			t.Errorf("%v: got %#v, want %#v", tc.in, got, tc.want)
+		}
+	}
+}
+
+func TestConnectErrorCodes(t *testing.T) {
+	for number, want := range map[int32]string{
+		18456: plugin.ErrCodeAuthFailed,
+		4060:  plugin.ErrCodeDatabaseNotFound,
+		4063:  plugin.ErrCodeDatabaseNotFound,
+	} {
+		ce, ok := plugin.AsConnError(connectError(mssqldb.Error{Number: number, Message: "server says no"}))
+		if !ok || ce.Code != want {
+			t.Errorf("error %d: got %v, want %s", number, ce, want)
 		}
 	}
 }

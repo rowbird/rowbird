@@ -90,7 +90,8 @@ func TestConformance(t *testing.T) {
 			{Name: "c_bin", Type: plugin.TypeBinary, Value: []byte{0, 255}},
 			{Name: "c_uuid", Type: plugin.TypeText, Value: "A0EEBC99-9C0B-4EF8-BB6D-6BB9BD380A11"},
 		},
-		SlowSQL:   "WAITFOR DELAY '00:00:30'; SELECT 1",
+		// One statement, since two are refused: a cross join that counts billions of rows.
+		SlowSQL:   "SELECT COUNT_BIG(*) FROM sys.all_columns a CROSS JOIN sys.all_columns b CROSS JOIN sys.all_columns c",
 		ParamSQL:  "SELECT CAST(@p1 AS nvarchar(100))",
 		InsertSQL: "INSERT INTO rb_rows (n) VALUES (99)",
 		Errors: map[string]map[string]any{

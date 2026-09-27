@@ -240,7 +240,9 @@ func connectError(err error) error {
 		switch me.Number {
 		case 18456:
 			return plugin.NewConnError(plugin.ErrCodeAuthFailed, err)
-		case 4060:
+		case 4060, 4063:
+			// 4060: cannot open the database; 4063: the same, when the login has a default database
+			// to fall back to (master, for example).
 			return plugin.NewConnError(plugin.ErrCodeDatabaseNotFound, err)
 		}
 	}
