@@ -1,0 +1,10 @@
+{
+  "plugin.discord.description": "Sends each run to a Discord channel through a webhook, with the result and the files.",
+  "plugin.discord.max_attachment_mb.help": "The server's upload limit. Larger files are shared as links.",
+  "plugin.discord.max_attachment_mb.label": "Largest file (MB)",
+  "plugin.discord.message.default": "**{{report.name}}**\n{{run.rows}} rows · {{run.started_at}}",
+  "plugin.discord.message.label": "Message",
+  "plugin.discord.name": "Discord",
+  "plugin.discord.username.label": "Name shown as the sender",
+  "plugin.discord.webhook_url.label": "Webhook URL"
+}

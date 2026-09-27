@@ -1,0 +1,24 @@
+title="Vendas por região" creator="Rowbird" created=2026-09-25T12:00:00Z
+sheets=["Vendas por região"]
+freeze=true ysplit=1 topleft=A2
+defined _xlnm._FilterDatabase='Vendas por região'!$A$1:$J$1
+width A=8
+width B=8
+width C=8
+width D=8
+width E=8
+width F=8
+width G=12
+width H=8
+width I=9
+width J=8
+A1 type=5 raw="id" bold
+B1 type=5 raw="região" bold
+C1 type=5 raw="total" bold
+D1 type=5 raw="ratio" bold
+E1 type=5 raw="active" bold
+F1 type=5 raw="day" bold
+G1 type=5 raw="created_at" bold
+H1 type=5 raw="at" bold
+I1 type=5 raw="payload" bold
+J1 type=5 raw="raw" bold

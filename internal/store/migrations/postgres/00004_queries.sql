@@ -1,0 +1,36 @@
+-- +goose Up
+CREATE TABLE queries (
+    id                 UUID PRIMARY KEY,
+    workspace_id       UUID NOT NULL REFERENCES workspaces (id),
+    title              TEXT NOT NULL,
+    slug               TEXT NOT NULL,
+    description        TEXT NOT NULL DEFAULT '',
+    connection_id      UUID NOT NULL REFERENCES connections (id),
+    current_version_id UUID,
+    created_at         TIMESTAMPTZ NOT NULL,
+    updated_at         TIMESTAMPTZ NOT NULL,
+    created_by         UUID,
+    version            BIGINT NOT NULL DEFAULT 1,
+    UNIQUE (workspace_id, slug)
+);
+CREATE INDEX queries_connection_idx ON queries (connection_id);
+
+CREATE TABLE query_versions (
+    id           UUID PRIMARY KEY,
+    workspace_id UUID NOT NULL REFERENCES workspaces (id),
+    query_id     UUID NOT NULL REFERENCES queries (id) ON DELETE CASCADE,
+    number       INTEGER NOT NULL,
+    sql          TEXT NOT NULL,
+    params       JSONB NOT NULL DEFAULT '[]',
+    note         TEXT NOT NULL DEFAULT '',
+    restored_from INTEGER,
+    created_at   TIMESTAMPTZ NOT NULL,
+    updated_at   TIMESTAMPTZ NOT NULL,
+    created_by   UUID,
+    version      BIGINT NOT NULL DEFAULT 1,
+    UNIQUE (query_id, number)
+);
+
+-- +goose Down
+DROP TABLE query_versions;
+DROP TABLE queries;

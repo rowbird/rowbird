@@ -1,0 +1,5 @@
+{
+  "plugin.mysql.description": "MySQL 8 or later and MariaDB 10.6 or later, including managed services such as Amazon RDS, Aurora and PlanetScale.",
+  "plugin.mysql.name": "MySQL / MariaDB",
+  "plugin.mysql.tls_mode.help": "prefer uses TLS when the server offers it, without checking the certificate. verify-full also checks the certificate and the host name, and is recommended over the internet."
+}

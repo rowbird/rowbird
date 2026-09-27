@@ -1,0 +1,16 @@
+{
+  "plugin.webhook.description": "Envia cada execução em JSON para uma URL, assinada para que quem recebe possa conferir.",
+  "plugin.webhook.headers.help": "Um por linha, como Nome: valor.",
+  "plugin.webhook.headers.label": "Cabeçalhos",
+  "plugin.webhook.hmac_secret.help": "Assina cada requisição em X-Rowbird-Signature (HMAC-SHA256). Deixe vazio para enviar sem assinatura.",
+  "plugin.webhook.hmac_secret.label": "Segredo de assinatura",
+  "plugin.webhook.include_links.label": "Incluir links para os arquivos",
+  "plugin.webhook.include_rows.help": "As primeiras linhas do resultado vão no conteúdo, até 1.000.",
+  "plugin.webhook.include_rows.label": "Linhas incluídas",
+  "plugin.webhook.method.POST": "POST",
+  "plugin.webhook.method.PUT": "PUT",
+  "plugin.webhook.method.label": "Método",
+  "plugin.webhook.name": "Webhook",
+  "plugin.webhook.secret_headers.label": "Cabeçalhos secretos",
+  "plugin.webhook.url.label": "URL"
+}

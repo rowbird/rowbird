@@ -1,0 +1,32 @@
+maroto
+  page
+    row "16"
+      col "100"
+        text "Vendas por região" bold
+        text "Gerado em 25/09/2026 09:00"
+    row "5.822222222222223"
+      col "9"
+        text "id" right bold
+      col "11"
+        text "região" bold
+      col "10"
+        text "total" right bold
+      col "10"
+        text "ratio" right bold
+      col "10"
+        text "active" bold
+      col "8"
+        text "day" bold
+      col "15"
+        text "created_at" bold
+      col "8"
+        text "at" bold
+      col "11"
+        text "payload" bold
+      col "8"
+        text "raw" bold
+    row "4.822222222222223"
+      col "0"
+        text "Nenhuma linha."
+    row "153.353055555"
+      col "100"

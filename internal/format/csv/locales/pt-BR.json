@@ -1,0 +1,22 @@
+{
+  "plugin.format.csv.bom.auto": "Automático",
+  "plugin.format.csv.bom.label": "Marca de ordem de bytes (BOM)",
+  "plugin.format.csv.bom.no": "Não",
+  "plugin.format.csv.bom.yes": "Sim",
+  "plugin.format.csv.delimiter.auto": "Automático",
+  "plugin.format.csv.delimiter.comma": "Vírgula",
+  "plugin.format.csv.delimiter.help": "Automático usa ponto e vírgula em português e vírgula em inglês, como as planilhas esperam.",
+  "plugin.format.csv.delimiter.label": "Separador",
+  "plugin.format.csv.delimiter.pipe": "Barra vertical",
+  "plugin.format.csv.delimiter.semicolon": "Ponto e vírgula",
+  "plugin.format.csv.delimiter.tab": "Tabulação",
+  "plugin.format.csv.description": "Valores separados por vírgula ou ponto e vírgula, para planilhas e outras ferramentas.",
+  "plugin.format.csv.encoding.label": "Codificação",
+  "plugin.format.csv.encoding.utf-8": "UTF-8",
+  "plugin.format.csv.encoding.windows-1252": "Windows-1252 (Excel antigo)",
+  "plugin.format.csv.header.label": "Incluir os nomes das colunas",
+  "plugin.format.csv.name": "CSV",
+  "plugin.format.csv.number_format.label": "Números",
+  "plugin.format.csv.number_format.locale": "Separador decimal do idioma",
+  "plugin.format.csv.number_format.plain": "Sempre ponto decimal"
+}

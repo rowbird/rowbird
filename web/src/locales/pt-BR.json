@@ -1,0 +1,1362 @@
+{
+  "app": {
+    "name": "Rowbird",
+    "tagline": "Seus resultados SQL, entregues"
+  },
+  "nav": {
+    "label": "Navegação principal",
+    "home": "Início",
+    "reports": "Relatórios",
+    "queries": "Consultas",
+    "connections": "Conexões",
+    "channels": "Canais",
+    "runs": "Execuções",
+    "links": "Links",
+    "settings": "Configurações",
+    "groups": {
+      "build": "Criar",
+      "follow": "Acompanhar",
+      "setup": "Configurar"
+    }
+  },
+  "notFound": {
+    "title": "Página não encontrada",
+    "body": "A página que você procura não existe.",
+    "action": "Ir para o Início"
+  },
+  "theme": {
+    "label": "Tema",
+    "toggle": "Mudar tema",
+    "system": "Sistema",
+    "light": "Claro",
+    "dark": "Escuro"
+  },
+  "language": {
+    "label": "Idioma"
+  },
+  "userMenu": {
+    "label": "Menu do usuário",
+    "signOut": "Sair"
+  },
+  "ui": {
+    "close": "Fechar",
+    "notifications": "Notificações",
+    "sidebar": {
+      "toggle": "Mostrar ou ocultar menu lateral",
+      "title": "Navegação",
+      "description": "Links para todas as seções do Rowbird."
+    }
+  },
+  "common": {
+    "actions": "Ações",
+    "cancel": "Cancelar",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "download": "Baixar",
+    "loadMore": "Carregar mais",
+    "save": "Salvar",
+    "shownOnce": "Isto é exibido só uma vez. Copie agora e guarde em um lugar seguro."
+  },
+  "fields": {
+    "name": "Nome",
+    "email": "Email",
+    "password": "Senha",
+    "currentPassword": "Senha atual",
+    "newPassword": "Nova senha",
+    "confirmPassword": "Confirme a senha",
+    "passwordHint": "Pelo menos 10 caracteres. Algumas palavras sem relação entre si formam uma senha forte e fácil de lembrar.",
+    "passwordMismatch": "As senhas não coincidem",
+    "language": "Idioma",
+    "timezone": "Fuso horário"
+  },
+  "setup": {
+    "title": "Configurar o Rowbird",
+    "intro": "Crie a primeira conta de administrador. Você pode convidar o resto da equipe depois.",
+    "token": "Token de configuração",
+    "tokenHint": "O valor de ROWBIRD_SETUP_TOKEN configurado no servidor.",
+    "submit": "Criar conta e continuar",
+    "masterKey": {
+      "title": "Faça backup da chave mestra agora",
+      "body": "O Rowbird gerou a chave que criptografa as senhas de bancos de dados e as credenciais de canais. Sem ela, esses segredos não podem ser recuperados, e os backups do banco ficam inúteis. Copie este arquivo para um lugar seguro fora do servidor:",
+      "ack": "Já fiz backup da chave mestra"
+    }
+  },
+  "login": {
+    "title": "Entrar",
+    "submit": "Entrar",
+    "secondFactorTitle": "Confirme que é você",
+    "codeHelp": "Digite o código de 6 dígitos do seu app autenticador.",
+    "recoveryHelp": "Digite um dos seus códigos de recuperação. Cada código funciona só uma vez.",
+    "recoveryCode": "Código de recuperação",
+    "verify": "Verificar",
+    "useRecovery": "Usar um código de recuperação",
+    "useAuthenticator": "Usar o app autenticador",
+    "or": "ou",
+    "withPasskey": "Entrar com uma passkey",
+    "usePasskey": "Usar uma passkey",
+    "passkeyHelp": "Confirme com a passkey deste dispositivo, do seu celular ou da sua chave de segurança.",
+    "sso": "Entrar com login único",
+    "forgot": "Esqueceu a senha?"
+  },
+  "changePassword": {
+    "title": "Trocar senha",
+    "intro": "Sua senha foi definida por um administrador. Escolha sua própria senha para continuar.",
+    "submit": "Trocar senha",
+    "done": "Senha trocada. Suas outras sessões foram encerradas."
+  },
+  "twoFactorSetup": {
+    "title": "Configurar autenticação em dois fatores",
+    "intro": "Um administrador exige autenticação em dois fatores para todos. Configure para continuar.",
+    "usePasskey": "Usar uma passkey",
+    "orApp": "ou configure um aplicativo autenticador"
+  },
+  "twoFactor": {
+    "title": "Autenticação em dois fatores",
+    "short": "2FA",
+    "help": "Pede um código de um app autenticador ao entrar, além da senha.",
+    "on": "Ativa",
+    "off": "Desativada",
+    "enable": "Ativar autenticação em dois fatores",
+    "enabled": "A autenticação em dois fatores está ativa.",
+    "disable": "Desativar autenticação em dois fatores",
+    "disabled": "A autenticação em dois fatores foi desativada.",
+    "disableHelp": "Sua conta ficará protegida só pela senha. Confirme com sua senha.",
+    "regenerate": "Novos códigos de recuperação",
+    "regenerateHelp": "Seus códigos de recuperação atuais vão parar de funcionar. Confirme com sua senha.",
+    "scan": "Escaneie este QR code com um app autenticador como Google Authenticator, 1Password ou Aegis e digite o código que ele mostrar.",
+    "qrAlt": "QR code para adicionar o Rowbird a um app autenticador",
+    "manualEntry": "Não consegue escanear? Digite esta chave manualmente",
+    "code": "Código de verificação",
+    "codesTitle": "Códigos de recuperação",
+    "codesHelp": "Use um destes códigos para entrar se perder o autenticador. Cada código funciona uma vez. Guarde-os em um lugar seguro; eles não serão exibidos de novo.",
+    "savedCodes": "Já guardei meus códigos de recuperação"
+  },
+  "profile": {
+    "title": "Perfil",
+    "details": "Seus dados",
+    "saved": "Perfil salvo.",
+    "passwordHelp": "Trocar a senha encerra suas outras sessões."
+  },
+  "sessions": {
+    "title": "Sessões",
+    "help": "Navegadores em que você está conectado. Encerre as que não reconhecer.",
+    "current": "Este navegador",
+    "revoke": "Encerrar",
+    "lastSeen": "última atividade {when}",
+    "unknownDevice": "Dispositivo desconhecido",
+    "signOutEverywhere": "Sair de todos os lugares",
+    "signOutEverywhereHelp": "Todas as {count} sessões serão encerradas, inclusive esta."
+  },
+  "roles": {
+    "viewer": "Leitor",
+    "editor": "Editor",
+    "admin": "Admin",
+    "viewerHelp": "Vê tudo exceto segredos, acompanha execuções e baixa resultados.",
+    "editorHelp": "Leitor, mais escrever consultas, gerenciar relatórios e entregas, e rodar relatórios.",
+    "adminHelp": "Editor, mais conexões, canais, usuários, API keys e configurações."
+  },
+  "scopes": {
+    "read": "Leitura",
+    "run": "Execução",
+    "write": "Escrita",
+    "admin": "Admin",
+    "readHelp": "Lê tudo o que um admin pode ler, exceto segredos.",
+    "runHelp": "Leitura, mais rodar relatórios.",
+    "writeHelp": "Execução, mais criar e alterar consultas, relatórios e entregas.",
+    "adminHelp": "Acesso total, incluindo usuários, API keys e configurações."
+  },
+  "settings": {
+    "sections": "Seções de configurações",
+    "saved": "Configurações salvas.",
+    "readOnly": "Só admins podem alterar estas configurações.",
+    "general": {
+      "title": "Geral",
+      "help": "Padrões para novos usuários e relatórios.",
+      "defaultLocale": "Idioma padrão",
+      "defaultTimezone": "Fuso horário padrão",
+      "timezoneHint": "Usado em novos relatórios e nos parâmetros de data embutidos."
+    },
+    "users": {
+      "title": "Usuários e papéis",
+      "help": "Pessoas que podem entrar neste Rowbird e o que cada uma pode fazer.",
+      "add": "Adicionar usuário",
+      "addHelp": "O usuário recebe uma senha temporária que você compartilha com ele. Ele escolhe a própria senha no primeiro login.",
+      "created": "Usuário criado",
+      "role": "Papel",
+      "status": "Situação",
+      "lastLogin": "Último login",
+      "never": "Nunca",
+      "active": "Ativo",
+      "disabled": "Desativado",
+      "locked": "Bloqueado",
+      "temporaryPassword": "Senha temporária",
+      "temporaryPasswordHelp": "Compartilhe esta senha temporária com {email} por um canal privado. A pessoa precisa trocá-la no primeiro login.",
+      "changeRole": "Mudar papel",
+      "changeRoleImpact": "{name} ({email}) passará a ser {role} e será desconectado de todas as sessões.",
+      "disable": "Desativar usuário",
+      "disableImpact": "{name} ({email}) será desconectado de todos os lugares, as API keys dele serão revogadas e ele não conseguirá entrar.",
+      "enable": "Reativar usuário",
+      "enableImpact": "{name} ({email}) poderá entrar de novo. As API keys dele continuam revogadas.",
+      "resetPassword": "Redefinir senha",
+      "resetImpact": "{name} ({email}) será desconectado de todos os lugares e receberá uma nova senha temporária.",
+      "resetDone": "Senha redefinida",
+      "disable2fa": "Desativar autenticação em dois fatores",
+      "disable2faImpact": "{name} ({email}) poderá entrar só com a senha. Use quando a pessoa perdeu o autenticador e os códigos de recuperação.",
+      "updated": "Usuário atualizado.",
+      "emptyTitle": "Nenhum usuário ainda",
+      "emptyBody": "Usuários entram no Rowbird com email e senha. Admins os adicionam aqui e escolhem o papel de cada um."
+    },
+    "apiKeys": {
+      "title": "API keys",
+      "help": "Keys permitem que scripts e pipelines de CI usem a API do Rowbird. Cada key age com os escopos que você der a ela.",
+      "create": "Criar API key",
+      "createHelp": "Dê à key um nome que diga onde ela é usada, e só os escopos de que ela precisa.",
+      "createdTitle": "API key criada",
+      "createdHelp": "Envie no cabeçalho Authorization como token Bearer.",
+      "key": "API key",
+      "scopes": "Escopos",
+      "lastUsed": "Último uso",
+      "expires": "Expira",
+      "expiresOn": "Expira em",
+      "expiresHint": "Opcional. A key para de funcionar no fim deste dia.",
+      "noExpiry": "Nunca",
+      "inactive": "Inativa",
+      "revoke": "Revogar",
+      "revoked": "API key revogada.",
+      "revokeImpact": "Tudo o que usa a key {name} vai parar de funcionar imediatamente. Isso não pode ser desfeito.",
+      "emptyTitle": "Nenhuma API key",
+      "emptyBody": "Crie uma key para chamar a API do Rowbird a partir de scripts, pipelines de CI ou outras ferramentas, por exemplo para disparar um relatório depois de uma carga de dados."
+    },
+    "security": {
+      "title": "Segurança",
+      "require2faTitle": "Autenticação em dois fatores",
+      "require2faHelp": "Quando exigida, usuários sem autenticação em dois fatores precisam configurá-la na próxima requisição, antes de fazer qualquer outra coisa.",
+      "require2fa": "Exigir autenticação em dois fatores de todos",
+      "require2faImpact": "Todo usuário sem autenticação em dois fatores, inclusive admins, terá que configurá-la antes de continuar.",
+      "require2faConfirm": "Exigir",
+      "eventsTitle": "Eventos de segurança",
+      "eventsHelp": "Logins, mudanças em contas e outras ações relevantes para a segurança, dos mais recentes aos mais antigos.",
+      "filter": "Filtrar por evento",
+      "allEvents": "Todos os eventos",
+      "when": "Quando",
+      "event": "Evento",
+      "ip": "Endereço IP",
+      "details": "Detalhes",
+      "emptyTitle": "Nenhum evento",
+      "emptyBody": "Os eventos de segurança aparecem aqui conforme as pessoas entram e alteram contas, keys e configurações.",
+      "oidc": {
+        "title": "Login único (OIDC)",
+        "help": "Permita que as pessoas entrem com o seu provedor de identidade (Google Workspace, Microsoft Entra ID, Okta, Keycloak e outros). O provedor cuida da senha e do segundo fator delas.",
+        "needsBaseURL": "O login único precisa da URL pública deste servidor (ROWBIRD_BASE_URL) para o endereço de retorno do provedor.",
+        "enabled": "Oferecer login único na tela de entrada",
+        "redirectURI": "URI de redirecionamento",
+        "redirectHint": "Cadastre este endereço no provedor como URI de redirecionamento (callback).",
+        "issuer": "URL do emissor (issuer)",
+        "issuerHint": "O endereço do provedor; as configurações dele são lidas de /.well-known/openid-configuration.",
+        "test": "Testar",
+        "testOk": "O provedor respondeu.",
+        "clientId": "Client ID",
+        "clientSecret": "Client secret",
+        "clientSecretHint": "Deixe vazio para um cliente público, que depende só do PKCE.",
+        "secretSaved": "Há um segredo salvo.",
+        "replace": "Substituir",
+        "scopes": "Escopos",
+        "scopesHint": "Separados por espaço. openid sempre é incluído.",
+        "buttonLabel": "Texto do botão",
+        "buttonLabelHint": "Por exemplo \"Entrar com Acme\". Vazio mostra \"Entrar com login único\".",
+        "domains": "Domínios de email permitidos",
+        "domainsHint": "Separados por vírgula. Quando preenchido, só e-mails verificados desses domínios podem entrar pelo provedor.",
+        "autoProvision": "Criar a conta no primeiro acesso",
+        "defaultRole": "Papel das novas contas",
+        "linking": "Quem já tem conta entra nela quando o provedor verificou o mesmo email; a partir daí as duas ficam vinculadas."
+      }
+    },
+    "alerts": {
+      "title": "Alertas",
+      "help": "Quando um canal ou relatório começa a falhar, o Rowbird manda um alerta pelo canal primário, ou pelo alternativo quando o primário falha, e uma mensagem quando volta a funcionar. O sino de notificações mostra os mesmos alertas.",
+      "none": "Nenhum",
+      "primary": "Canal primário",
+      "primaryHint": "Recebe todos os alertas.",
+      "fallback": "Canal alternativo",
+      "fallbackHint": "Usado quando o primário falha, ou quando o alerta é sobre o próprio primário.",
+      "noChannels": "Nenhum canal pode receber alertas ainda.",
+      "sameDestination": "O primário e o alternativo são do mesmo tipo de canal. Uma queda desse serviço pararia os dois; prefira tipos diferentes."
+    },
+    "heartbeat": {
+      "title": "Heartbeat",
+      "help": "O Rowbird chama este endereço regularmente enquanto está saudável, para que um monitor externo (Uptime Kuma, Healthchecks.io) avise quando ele parar.",
+      "url": "URL do heartbeat",
+      "urlHint": "Chamada com GET. Fica guardada criptografada e não é mostrada de novo.",
+      "configured": "Há uma URL salva.",
+      "replace": "Substituir",
+      "remove": "Remover",
+      "interval": "Intervalo (segundos)",
+      "intervalHint": "Entre 30 e 86400. Padrão 60."
+    },
+    "ai": {
+      "title": "IA",
+      "help": "O assistente escreve consultas e agendas a partir de uma descrição. Ele fica desligado até você escolher um provedor.",
+      "privacy": "Só o pedido, o dialeto da conexão e o schema dela (sem as tabelas excluídas da IA) vão para o provedor. As linhas nunca saem dos seus bancos, e as propostas só rodam quando alguém as aplica.",
+      "provider": "Provedor",
+      "off": "Desligado (sem IA)",
+      "test": "Testar",
+      "testing": "Testando...",
+      "testOk": "O provedor aceitou a chave e o modelo.",
+      "testFailed": "O teste falhou",
+      "saved": "Configurações de IA salvas",
+      "turnedOff": "O assistente de IA está desligado"
+    },
+    "storage": {
+      "title": "Armazenamento e retenção",
+      "retentionTitle": "Retenção",
+      "retentionHelp": "Uma tarefa diária apaga o que passar destes limites, no máximo uma vez por dia entre todas as instâncias.",
+      "runsDays": "Manter execuções por (dias)",
+      "runsDaysHint": "Execuções mais antigas são apagadas com as tentativas de entrega, os links compartilhados e os arquivos.",
+      "artifactsDays": "Manter arquivos das execuções por (dias)",
+      "artifactsDaysHint": "Arquivos mais antigos são apagados; a execução continua, e os links avisam que o arquivo não existe mais.",
+      "fixed": "Eventos de segurança ficam guardados por 365 dias, e notificações por 90 dias depois de resolvidas.",
+      "usageTitle": "Armazenamento de arquivos",
+      "backend": "Onde os arquivos ficam",
+      "backends": {
+        "local": "Disco local (diretório de dados)",
+        "s3": "Bucket S3"
+      },
+      "used": "Espaço usado",
+      "lastCleanup": "Última limpeza",
+      "never": "Nunca",
+      "backupTitle": "Backups agendados",
+      "backupHelp": "Os backups são configurados no servidor com as variáveis ROWBIRD_BACKUP_*. Você também pode rodar rowbird backup quando quiser.",
+      "backupPostgres": "O banco interno é Postgres: faça o backup com pg_dump. Backups agendados só cobrem SQLite.",
+      "backupOff": "Os backups agendados estão desligados. Defina ROWBIRD_BACKUP_SCHEDULE (uma expressão cron em UTC) para ligá-los.",
+      "backupFailed": "O último backup agendado falhou: {error}",
+      "schedule": "Agenda",
+      "destination": "Destino",
+      "destinations": {
+        "local": "Diretório de backups, mantendo os {keep} mais recentes",
+        "s3": "Diretório de backups e bucket S3, mantendo os {keep} mais recentes"
+      },
+      "lastBackup": "Último backup",
+      "nextBackup": "Próximo backup",
+      "masterKeyReminder": "Os backups não incluem a chave mestra. Guarde uma cópia dela em um lugar seguro: sem ela, as credenciais salvas em um backup não podem ser lidas."
+    },
+    "about": {
+      "title": "Sobre",
+      "version": "Versão",
+      "commit": "Commit",
+      "built": "Compilado em",
+      "platform": "Plataforma",
+      "updatesTitle": "Atualizações",
+      "updatesHelp": "Uma vez por dia o Rowbird pode perguntar ao GitHub qual é a versão mais recente. A requisição leva só a versão em uso; nada sobre seus dados ou seus usuários é enviado.",
+      "checkForUpdates": "Verificar novas versões",
+      "disabledByServer": "A verificação de atualizações está desligada no servidor (ROWBIRD_UPDATE_CHECK=false).",
+      "available": "A versão {version} está disponível",
+      "releaseNotes": "Notas da versão",
+      "upToDate": "Você está na versão mais recente (verificado em {when})."
+    }
+  },
+  "events": {
+    "login_success": "Login",
+    "login_failed": "Login sem sucesso",
+    "login_locked": "Conta bloqueada",
+    "logout": "Saída",
+    "password_changed": "Senha trocada",
+    "password_reset": "Senha redefinida",
+    "2fa_enabled": "2FA ativada",
+    "2fa_disabled": "2FA desativada",
+    "recovery_codes_regenerated": "Novos códigos de recuperação",
+    "recovery_code_used": "Código de recuperação usado",
+    "session_revoked": "Sessão encerrada",
+    "user_created": "Usuário criado",
+    "user_updated": "Usuário atualizado",
+    "user_role_changed": "Papel alterado",
+    "user_disabled": "Usuário desativado",
+    "user_enabled": "Usuário reativado",
+    "api_key_created": "API key criada",
+    "api_key_revoked": "API key revogada",
+    "settings_changed": "Configurações alteradas",
+    "setup_completed": "Configuração inicial concluída",
+    "connection_created": "Conexão criada",
+    "connection_updated": "Conexão alterada",
+    "keys_rotated": "Chave mestra rotacionada",
+    "connection_deleted": "Conexão excluída",
+    "passkey_added": "Passkey adicionada",
+    "passkey_removed": "Passkey removida",
+    "oidc_linked": "Conta vinculada ao login único",
+    "user_provisioned": "Usuário criado pelo login único",
+    "password_reset_requested": "Redefinição de senha pedida"
+  },
+  "errors": {
+    "ai": {
+      "not_configured": "O assistente de IA não está configurado. Um administrador pode escolher um provedor em Configurações > IA.",
+      "no_schema": "O schema da conexão ainda não foi lido. Atualize-o na página da conexão antes.",
+      "too_many_requests": "Muitos pedidos ao assistente. Espere alguns minutos e tente de novo.",
+      "auth_failed": "O provedor de IA recusou a chave de API. Confira em Configurações > IA.",
+      "rejected": "O provedor de IA recusou o pedido.",
+      "unreachable": "Não foi possível alcançar o provedor de IA.",
+      "rate_limited": "O provedor de IA está limitando os pedidos. Tente de novo mais tarde.",
+      "timeout": "O provedor de IA demorou demais para responder.",
+      "network_blocked": "O endereço do provedor de IA está bloqueado pela política de rede.",
+      "failed": "O provedor de IA não conseguiu responder.",
+      "invalid_output": "A resposta da IA não pôde ser usada. Tente escrever o pedido de outro jeito."
+    },
+    "auth": {
+      "unauthenticated": "Sua sessão terminou. Entre novamente.",
+      "forbidden": "Você não tem permissão para fazer isso.",
+      "csrf_failed": "Não foi possível verificar a requisição. Recarregue a página e tente de novo.",
+      "rate_limited": "Muitas tentativas. Tente de novo em {seconds} segundos.",
+      "invalid_credentials": "Email ou senha incorretos.",
+      "mfa_invalid": "Código de verificação incorreto.",
+      "challenge_expired": "A tentativa de login expirou. Digite seu email e senha de novo.",
+      "locked": "Muitas tentativas sem sucesso. Tente de novo em {seconds} segundos.",
+      "password_change_required": "Troque sua senha antes de continuar.",
+      "mfa_setup_required": "Configure a autenticação em dois fatores antes de continuar.",
+      "oidc_unavailable": "O login único não está configurado neste servidor.",
+      "oidc_failed": "O login único não foi concluído. Tente de novo.",
+      "oidc_no_account": "Não há conta no Rowbird para esta identidade. Peça a um admin para adicionar você.",
+      "oidc_domain_not_allowed": "O domínio do seu email não tem permissão para entrar aqui.",
+      "oidc_email_unverified": "Seu provedor de identidade não verificou seu email, então ele não pode ser usado aqui.",
+      "oidc_discovery_failed": "Não foi possível acessar o provedor de identidade neste endereço.",
+      "reset_invalid": "Este link é inválido, já foi usado ou expirou. Peça um novo."
+    },
+    "channel": {
+      "name_taken": "Já existe um canal com este nome",
+      "in_use": "O canal é usado por relatórios e não pode ser excluído"
+    },
+    "condition": {
+      "column_not_found": "A condição usa uma coluna que a consulta não retorna.",
+      "invalid_value": "O valor da condição não combina com o tipo da coluna."
+    },
+    "conflict": {
+      "version": "Outra pessoa alterou isto enquanto isso. Recarregue e tente de novo.",
+      "duplicate": "Este valor já está em uso."
+    },
+    "connection": {
+      "name_taken": "Já existe uma conexão com este nome.",
+      "in_use": "A conexão é usada por consultas e não pode ser excluída.",
+      "auth_failed": "O banco recusou o usuário ou a senha.",
+      "host_unreachable": "Não foi possível alcançar o servidor do banco. Confira o host, a porta e o firewall.",
+      "tls_required": "O servidor do banco exige uma conexão criptografada (TLS). Mude o modo TLS.",
+      "tls_failed": "Não foi possível estabelecer a conexão criptografada (TLS). Confira o modo TLS e os certificados.",
+      "database_not_found": "O banco não foi encontrado, ou o usuário não tem acesso a ele.",
+      "timeout": "O servidor do banco não respondeu a tempo.",
+      "network_blocked": "A política de rede deste Rowbird não permite este endereço.",
+      "path_not_allowed": "O arquivo está fora dos diretórios permitidos para SQLite (ROWBIRD_SQLITE_DIRS).",
+      "ssh_auth_failed": "O host SSH recusou o usuário, a senha ou a chave.",
+      "ssh_host_key_unknown": "A chave do host SSH precisa ser confirmada.",
+      "ssh_host_key_mismatch": "A chave do host SSH mudou desde que foi confirmada. Se a mudança é esperada, atualize o fingerprint.",
+      "ssh_unreachable": "Não foi possível alcançar o host SSH.",
+      "failed": "A conexão falhou."
+    },
+    "delivery": {
+      "no_system_mailer": "Nenhum canal de email está marcado para emails do sistema. Marque um em Canais para enviar testes por email.",
+      "not_failed": "Só uma entrega que falhou pode ser reenviada.",
+      "not_resendable": "Esta entrega não pode ser reenviada: foi um teste para você, ou a entrega foi excluída.",
+      "failed": "A entrega falhou.",
+      "auth_failed": "O destino recusou as credenciais. Confira as configurações do canal.",
+      "rejected": "O destino rejeitou a mensagem.",
+      "unreachable": "Não foi possível alcançar o destino.",
+      "too_large": "A mensagem era grande demais para o destino.",
+      "rate_limited": "O destino está limitando as requisições. Tente de novo mais tarde.",
+      "timeout": "O destino demorou demais para responder.",
+      "network_blocked": "O endereço está bloqueado pela política de rede (endereços privados não são permitidos).",
+      "base_url_missing": "Links precisam do ROWBIRD_BASE_URL, que não está definido.",
+      "channel_unavailable": "O canal não existe mais ou não pode ser usado.",
+      "result_unavailable": "O resultado não está mais disponível para gerar os arquivos."
+    },
+    "gitops": {
+      "not_managed": "Isto não é gerenciado pelo diretório de configuração.",
+      "not_detached": "Isto não foi desvinculado do diretório de configuração."
+    },
+    "internal": "Algo deu errado. Tente de novo em instantes.",
+    "link": {
+      "not_found": "Este link não existe. Confira se ele foi copiado inteiro.",
+      "expired": "Este link expirou ou foi revogado. Peça um novo a quem compartilhou.",
+      "login_required": "Entre para abrir este link.",
+      "revoked": "O link já foi revogado"
+    },
+    "query": {
+      "slug_taken": "Já existe uma consulta com este slug.",
+      "in_use": "A consulta é usada por relatórios e não pode ser excluída.",
+      "timeout": "A consulta passou do tempo limite.",
+      "cancelled": "A consulta foi cancelada.",
+      "multiple_statements": "Só um comando é permitido. A conexão não permite vários.",
+      "read_only": "A consulta tentou alterar dados. O Rowbird só lê.",
+      "failed": "O banco não conseguiu executar a consulta. Confira o SQL."
+    },
+    "report": {
+      "slug_taken": "Já existe um relatório com este slug.",
+      "run_active": "O relatório tem uma execução em andamento. Aguarde ou cancele antes."
+    },
+    "request": {
+      "invalid": "A requisição é inválida.",
+      "unsupported_media_type": "O formato da requisição não é suportado.",
+      "method_not_allowed": "Esta ação não é permitida aqui."
+    },
+    "resource": {
+      "not_found": "Não foi encontrado. Pode ter sido removido.",
+      "managed_by_gitops": "Isto é gerenciado pelo diretório de configuração. Um administrador pode desvinculá-lo para alterar aqui."
+    },
+    "route": {
+      "not_found": "Este endpoint da API não existe."
+    },
+    "run": {
+      "not_active": "A execução já terminou.",
+      "cancelled": "Cancelada por um usuário.",
+      "shutdown": "Cancelada porque o servidor parou.",
+      "instance_lost": "O servidor que a rodava parou inesperadamente.",
+      "overlap": "Pulada: a execução anterior ainda estava em andamento.",
+      "condition_false": "Pulada: a condição não foi atendida.",
+      "invalid_params": "Os parâmetros da consulta estão faltando ou são inválidos.",
+      "query_missing": "A consulta do relatório não existe mais.",
+      "internal": "Um erro inesperado aconteceu ao rodar o relatório.",
+      "result_unavailable": "O resultado desta execução não está mais disponível.",
+      "delivery_failed": "A consulta rodou, mas algumas entregas falharam. Você pode reenviá-las."
+    },
+    "setup": {
+      "completed": "O Rowbird já está configurado. Entre com sua conta.",
+      "invalid_token": "O token de configuração está incorreto."
+    },
+    "totp": {
+      "already_enabled": "A autenticação em dois fatores já está ativa.",
+      "not_enabled": "A autenticação em dois fatores não está ativa.",
+      "not_started": "Comece a configuração em dois fatores de novo."
+    },
+    "user": {
+      "last_admin": "O workspace precisa de pelo menos um admin ativo.",
+      "self_modification": "Você não pode mudar o próprio papel nem desativar a própria conta.",
+      "email_taken": "Já existe um usuário com este email."
+    },
+    "validation": {
+      "failed": "Verifique os campos destacados.",
+      "required": "Obrigatório.",
+      "email": "Informe endereços de email válidos, separados por vírgula.",
+      "too_short": "Muito curta. Use pelo menos 10 caracteres.",
+      "too_long": "Muito longo.",
+      "password_common": "Esta senha é comum demais ou fácil de adivinhar.",
+      "password_incorrect": "A senha está incorreta.",
+      "invalid_value": "Escolha um valor válido.",
+      "code_invalid": "O código não é válido. Confira a hora do celular e tente o código atual.",
+      "slug": "Use letras minúsculas, números, hífens e sublinhados, começando com letra ou número.",
+      "immutable": "Isto não pode ser alterado.",
+      "range": "Fora do intervalo permitido.",
+      "invalid_type": "Tipo de valor errado.",
+      "unknown_field": "Campo desconhecido.",
+      "param_undefined": "Este parâmetro é usado no SQL mas não está definido.",
+      "param_name": "Use letras, números e sublinhados, começando com letra.",
+      "duplicate": "Este nome está repetido.",
+      "param_reserved": "Este nome é reservado para um parâmetro embutido.",
+      "cron": "Informe uma expressão cron válida, com cinco campos e no máximo uma vez por minuto.",
+      "cron_never": "Esta agenda nunca roda; confira o dia e o mês.",
+      "timezone": "Escolha um fuso horário válido.",
+      "too_many": "Itens demais.",
+      "base_url_missing": "Configure ROWBIRD_BASE_URL para compartilhar arquivos como links.",
+      "template": "O template tem um erro de sintaxe.",
+      "template_variable": "O template usa uma variável que não existe.",
+      "url": "Informe um endereço http ou https.",
+      "no_delivery": "Este relatório não tem entrega nesse canal.",
+      "alerts_unsupported": "Este canal não pode receber alertas.",
+      "same_channel": "Escolha um canal diferente do primário.",
+      "not_found": "Não existe."
+    },
+    "passkey": {
+      "unavailable": "Passkeys precisam da URL pública deste servidor (ROWBIRD_BASE_URL).",
+      "failed": "Não foi possível verificar a passkey. Tente de novo ou use outra passkey.",
+      "exists": "Esta passkey já está cadastrada."
+    }
+  },
+  "schemaForm": {
+    "configured": "Configurado",
+    "replace": "Substituir",
+    "remove": "Remover",
+    "variables": "Inserir:",
+    "insertVariable": "Inserir {name}"
+  },
+  "connections": {
+    "help": "Bancos de dados que o Rowbird lê. O Rowbird nunca escreve neles.",
+    "add": "Adicionar conexão",
+    "askAdmin": "Peça a um admin para adicionar uma conexão.",
+    "emptyTitle": "Nenhuma conexão ainda",
+    "emptyBody": "Uma conexão diz ao Rowbird como alcançar um dos seus bancos: PostgreSQL, MySQL, MariaDB, SQL Server ou SQLite. Consultas e relatórios rodam sobre conexões.",
+    "driver": "Banco",
+    "status": "Situação",
+    "lastChecked": "Última verificação",
+    "canWrite": "Pode escrever",
+    "statuses": {
+      "unknown": "Não verificada",
+      "ok": "OK",
+      "error": "Com falha"
+    },
+    "chooseDriver": "Escolha o banco de dados",
+    "chooseDriverHelp": "Você pode adicionar outras conexões depois.",
+    "changeDriver": "Escolher outro banco",
+    "name": "Nome",
+    "nameHint": "Letras minúsculas, números, hífens e sublinhados. Usado para se referir a esta conexão em arquivos YAML.",
+    "editTitle": "Editar {name}",
+    "edit": "Editar",
+    "delete": "Excluir conexão",
+    "deleteImpact": "A conexão {name} e as credenciais guardadas serão excluídas. Isso não pode ser desfeito.",
+    "deleted": "Conexão excluída.",
+    "saved": "Conexão salva.",
+    "savedWithError": "Conexão salva, mas a verificação falhou: {error}",
+    "lastCheckFailed": "A última verificação falhou",
+    "limits": {
+      "title": "Limites",
+      "help": "Protegem o banco de consultas longas ou grandes demais.",
+      "timeout": "Tempo limite da consulta (segundos)",
+      "maxRows": "Máximo de linhas por consulta",
+      "multi": "Permitir vários comandos numa consulta",
+      "multiWarning": "Vários comandos numa consulta tornam possível alterar dados se o usuário do banco puder escrever. Use um usuário somente leitura."
+    },
+    "test": {
+      "button": "Testar conexão",
+      "running": "Testando...",
+      "ok": "A conexão funciona",
+      "okDetail": "{version}, respondeu em {ms} ms, {tables} tabelas e views encontradas.",
+      "failed": "A conexão falhou"
+    },
+    "writeWarning": {
+      "title": "Este usuário pode alterar dados",
+      "body": "O Rowbird só lê, mas um usuário com permissão de escrita é mais arriscado. Crie um usuário do banco com permissão somente de leitura e use-o aqui."
+    },
+    "fingerprint": {
+      "title": "Confirme a chave do host SSH",
+      "body": "Esta é a primeira conexão com este host SSH. Compare o fingerprint abaixo com o mostrado por ssh-keygen -lf no host antes de confiar nele.",
+      "trust": "Confiar nesta chave e testar de novo"
+    },
+    "schema": {
+      "title": "Schema",
+      "cachedAt": "Lido {when}.",
+      "never": "Ainda não lido.",
+      "aiHelp": "Tabelas excluídas do assistente de IA nunca são enviadas a ele.",
+      "refresh": "Ler de novo",
+      "refreshed": "Schema atualizado.",
+      "search": "Buscar tabelas e colunas",
+      "emptyTitle": "Nenhuma tabela",
+      "emptyBody": "Teste a conexão ou leia o schema de novo. Só aparecem as tabelas que o usuário pode ler.",
+      "view": "view",
+      "columns": "{n} colunas",
+      "excludeFromAI": "Excluir da IA",
+      "excluded": "Excluída da IA"
+    },
+    "types": {
+      "text": "texto",
+      "integer": "inteiro",
+      "decimal": "decimal",
+      "float": "ponto flutuante",
+      "boolean": "booleano",
+      "date": "data",
+      "datetime": "data e hora",
+      "time": "hora",
+      "json": "JSON",
+      "binary": "binário",
+      "unknown": "outro"
+    }
+  },
+  "params": {
+    "title": "Parâmetros",
+    "none": "Nenhum parâmetro. Escreva um nome entre chaves duplas no SQL, como today, para adicionar um.",
+    "builtins": "Embutidos:",
+    "name": "Nome",
+    "type": "Tipo",
+    "default": "Padrão",
+    "previewValue": "Valor para a prévia",
+    "unused": "Não usado no SQL",
+    "remove": "Remover o parâmetro {name}",
+    "types": {
+      "text": "Texto",
+      "integer": "Inteiro",
+      "decimal": "Decimal",
+      "boolean": "Sim ou não",
+      "date": "Data",
+      "datetime": "Data e hora"
+    },
+    "builtin": {
+      "now": "Data e hora atuais",
+      "today": "Hoje",
+      "yesterday": "Ontem",
+      "start_of_week": "Segunda-feira desta semana",
+      "start_of_month": "Primeiro dia deste mês",
+      "start_of_last_month": "Primeiro dia do mês passado",
+      "end_of_last_month": "Último dia do mês passado",
+      "start_of_year": "1º de janeiro deste ano"
+    }
+  },
+  "results": {
+    "title": "Resultados",
+    "hint": "Execute a consulta (Ctrl ou Cmd + Enter) para ver uma prévia de até 100 linhas.",
+    "viewerHint": "Só editores podem rodar consultas.",
+    "summary": "{rows} linhas em {ms} ms",
+    "truncated": "Mostrando as primeiras {rows} linhas; há mais.",
+    "params": "Parâmetros ({tz}):",
+    "empty": "Nenhuma linha.",
+    "true": "sim",
+    "false": "não",
+    "bytes": "{n} bytes"
+  },
+  "queries": {
+    "help": "SQL salvo com seu histórico. Relatórios executam consultas em horários definidos.",
+    "add": "Nova consulta",
+    "emptyTitle": "Nenhuma consulta ainda",
+    "emptyBody": "Uma consulta é um SQL que roda numa conexão, com parâmetros como today ou yesterday. Cada salvamento guarda uma versão que você pode comparar e restaurar.",
+    "lastChange": "Última alteração",
+    "reports": "Relatórios",
+    "byAuthor": "por {author}, versão {n}",
+    "usedBy": "usada por um relatório | usada por {n} relatórios",
+    "editor": {
+      "title": "Título",
+      "titlePlaceholder": "Por exemplo, Vendas por região",
+      "meta": "Versão {n} por {author}",
+      "connection": "Conexão",
+      "slug": "Slug",
+      "slugHint": "Usado para se referir a esta consulta em arquivos YAML.",
+      "description": "Descrição",
+      "sql": "SQL",
+      "sqlPlaceholder": "SELECT ...",
+      "run": "Rodar",
+      "running": "Rodando...",
+      "runShortcut": "Ctrl ou Cmd + Enter",
+      "needConnection": "Adicione uma conexão primeiro, para que as consultas tenham um banco onde rodar.",
+      "noSchema": "Nenhuma tabela ainda. Teste a conexão para ler o schema.",
+      "toggleColumns": "Mostrar ou ocultar as colunas de {table}",
+      "undefinedParams": "Defina estes parâmetros: {names}",
+      "saveTitle": "Salvar consulta",
+      "saveHelp": "Alterar o SQL ou os parâmetros cria uma nova versão.",
+      "saveFirstHelp": "A primeira versão da consulta será salva.",
+      "saveImpact": "Esta consulta é usada por um relatório; ele vai executar a nova versão. | Esta consulta é usada por {n} relatórios; eles vão executar a nova versão.",
+      "note": "Nota",
+      "noteHint": "Opcional. O que mudou, mostrado no histórico.",
+      "saved": "Consulta salva.",
+      "savedVersion": "Salva como versão {n}.",
+      "created": "Consulta criada.",
+      "delete": "Excluir consulta",
+      "deleteImpact": "A consulta {title} e suas {n} versões serão excluídas. Isso não pode ser desfeito.",
+      "deleted": "Consulta excluída."
+    },
+    "versions": {
+      "title": "Versões",
+      "help": "Toda mudança no SQL ou nos parâmetros fica guardada. Escolha uma versão para compará-la com a atual.",
+      "label": "Versão {n}",
+      "current": "atual",
+      "restoredFrom": "Restaurada da versão {n}",
+      "pick": "Escolha uma versão anterior para comparar.",
+      "comparing": "Mudanças da versão {n} para a versão atual {current}.",
+      "restore": "Restaurar a versão {n}",
+      "restoreImpact": "Uma nova versão é criada com o SQL e os parâmetros da versão {n}. O histórico é mantido.",
+      "restored": "Versão {n} restaurada como versão {current}."
+    }
+  },
+  "reports": {
+    "help": "Consultas que rodam numa agenda e entregam o resultado quando a condição é atendida.",
+    "add": "Novo relatório",
+    "emptyTitle": "Nenhum relatório ainda",
+    "emptyBody": "Um relatório roda uma consulta salva numa agenda, confere uma condição e entrega o resultado. Crie um para receber os resultados do seu SQL sem precisar pedir.",
+    "resumed": "Relatório retomado.",
+    "paused": "Relatório pausado.",
+    "status": {
+      "active": "Ativo",
+      "paused": "Pausado",
+      "failing": "Com falhas"
+    },
+    "fields": {
+      "title": "Título",
+      "query": "Consulta",
+      "maxRows": "Limite de linhas",
+      "autoPauseAfter": "Pausar após falhas seguidas",
+      "retryMax": "Novas tentativas após uma falha",
+      "retryBackoff": "Espera antes da primeira nova tentativa (segundos)",
+      "misfire": "Quando uma execução foi perdida",
+      "overlap": "Quando a execução anterior ainda está rodando",
+      "notifyOwner": "Avisar o dono quando uma execução falhar"
+    },
+    "list": {
+      "status": "Situação",
+      "nextRun": "Próxima execução",
+      "lastRun": "Última execução",
+      "enabled": "Ativo",
+      "none": "Sem agendamento",
+      "never": "Nunca rodou",
+      "toggle": "Ativar ou pausar {title}"
+    },
+    "misfire": {
+      "run_once": "Rodar uma vez para compensar",
+      "skip": "Pular"
+    },
+    "overlap": {
+      "skip": "Pular a nova execução",
+      "queue": "Esperar e rodar depois"
+    },
+    "sections": {
+      "query": "Consulta",
+      "schedule": "Agenda",
+      "conditions": "Condições",
+      "advanced": "Avançado"
+    },
+    "editor": {
+      "editTitle": "Editar relatório",
+      "saved": "Relatório salvo.",
+      "created": "Relatório criado.",
+      "needQuery": "Salve uma consulta primeiro; um relatório roda uma consulta salva.",
+      "titlePlaceholder": "Por exemplo, Vendas do dia",
+      "slugHint": "Usado para referenciar este relatório em arquivos YAML.",
+      "overridesHelp": "Valores para os parâmetros da consulta quando este relatório roda. Deixe um campo vazio para usar o padrão.",
+      "defaultIs": "Padrão: {value}",
+      "noDefault": "Sem padrão; um valor é obrigatório.",
+      "enabled": "Começar a agendar agora",
+      "maxRowsHint": "Deixe vazio para usar o limite da conexão.",
+      "autoPauseHint": "0 nunca pausa o relatório.",
+      "retryBackoffHint": "Cada nova tentativa seguinte espera o dobro.",
+      "misfireHint": "Por exemplo, quando o servidor estava fora do ar no horário. Execuções perdidas nunca entram todas na fila.",
+      "overlapHint": "Só para execuções agendadas; execuções manuais sempre começam."
+    },
+    "detail": {
+      "queued": "Execução na fila.",
+      "deleted": "Relatório excluído.",
+      "runNow": "Rodar agora",
+      "runDeliver": "Rodar e entregar",
+      "runDeliverHint": "Uma execução completa: conta para as falhas e para a condição de resultado alterado.",
+      "pause": "Pausar",
+      "resume": "Retomar",
+      "edit": "Editar",
+      "autoPaused": "Pausado após {n} execuções seguidas com falha. Corrija a causa e retome o relatório.",
+      "runs": "Execuções recentes",
+      "allRuns": "Ver todas as execuções deste relatório",
+      "delete": "Excluir relatório",
+      "deleteImpact": "{title} e o histórico de execuções serão excluídos. A consulta é mantida."
+    },
+    "chart": {
+      "rows": "nenhuma linha | uma linha | {n} linhas",
+      "ms": "{n} ms",
+      "seconds": "{n} s",
+      "successRate": "Taxa de sucesso",
+      "median": "Duração mediana",
+      "lastFailure": "Última falha",
+      "none": "Nenhuma",
+      "noData": "Ainda sem execuções",
+      "alt": "As últimas {n} execuções: {rate}% com sucesso, duração mediana de {median}."
+    }
+  },
+  "schedule": {
+    "kind": "Frequência",
+    "kinds": {
+      "daily": "Todo dia",
+      "weekdays": "Dias úteis (segunda a sexta)",
+      "weekly": "Semanal, nos dias",
+      "monthly": "Mensal, no dia",
+      "hourly": "A cada hora",
+      "minutes": "A cada alguns minutos",
+      "custom": "Expressão cron personalizada"
+    },
+    "everyMinutes": "A cada minuto | A cada {n} minutos",
+    "timezone": "Fuso horário",
+    "time": "Às",
+    "dayOfMonth": "Dia",
+    "dayOfMonthHint": "Meses sem esse dia são pulados.",
+    "minute": "Minuto da hora",
+    "every": "Intervalo",
+    "days": "Dias",
+    "cron": "Expressão cron",
+    "cronHint": "Cinco campos: minuto, hora, dia do mês, mês e dia da semana.",
+    "nextRuns": "Próximas execuções ({tz}):",
+    "yourTime": "{time} no seu horário"
+  },
+  "conditions": {
+    "help": "Entregue só quando o resultado combinar. Sem regras, toda execução entrega.",
+    "always": "Sempre entregar.",
+    "deliverWhen": "Entregar quando",
+    "matchAll": "todas as regras valem",
+    "matchAny": "alguma regra vale",
+    "add": "Adicionar regra",
+    "remove": "Remover regra",
+    "summaryAll": "Todas: {rules}",
+    "summaryAny": "Alguma: {rules}",
+    "addType": "Tipo de regra a adicionar"
+  },
+  "runs": {
+    "help": "Todas as execuções de todos os relatórios, das mais recentes para as mais antigas.",
+    "emptyTitle": "Nenhuma execução ainda",
+    "emptyBody": "As execuções aparecem aqui quando um relatório roda na agenda ou quando alguém o roda manualmente.",
+    "status": {
+      "pending": "Na fila",
+      "running": "Rodando",
+      "success": "Concluída",
+      "partial": "Entregue em parte",
+      "skipped": "Pulada",
+      "failed": "Falhou",
+      "cancelled": "Cancelada"
+    },
+    "trigger": {
+      "schedule": "Agendada",
+      "manual": "Manual",
+      "test": "Teste",
+      "retry": "Reenvio"
+    },
+    "noDelivery": "só o resultado",
+    "ms": "{n} ms",
+    "seconds": "{n} s",
+    "fields": {
+      "status": "Situação",
+      "report": "Relatório",
+      "trigger": "Origem",
+      "started": "Início",
+      "duration": "Duração",
+      "rows": "Linhas"
+    },
+    "filters": {
+      "anyStatus": "Qualquer situação",
+      "anyTrigger": "Qualquer origem",
+      "anyReport": "Qualquer relatório",
+      "periodLabel": "Período",
+      "period": {
+        "all": "Qualquer data",
+        "24h": "Últimas 24 horas",
+        "7d": "Últimos 7 dias",
+        "30d": "Últimos 30 dias"
+      },
+      "emptyTitle": "Nenhuma execução com esses filtros",
+      "emptyBody": "Tente outro status, relatório, origem ou período, ou limpe os filtros para ver todas as execuções.",
+      "clear": "Limpar filtros"
+    },
+    "steps": {
+      "query": "Consulta",
+      "condition": "Condição",
+      "formats": "Formatos",
+      "deliveries": "Entregas"
+    },
+    "detail": {
+      "attempt": "tentativa {n}",
+      "cancel": "Cancelar execução",
+      "cancelling": "Cancelando...",
+      "cancelRequested": "Cancelamento pedido.",
+      "retrying": "Uma nova tentativa está na fila.",
+      "rows": "{n} linha | {n} linhas",
+      "truncated": "cortado no limite de linhas",
+      "version": "Versão {n} da consulta",
+      "sql": "SQL executado",
+      "conditionPassed": "Atendida; o resultado segue para a entrega.",
+      "conditionFailed": "Não atendida; nada é entregue.",
+      "firstResult": "primeiro resultado",
+      "noRows": "sem linhas",
+      "actual": "valor: {value}",
+      "rowCount": "{n} linhas",
+      "noFormats": "Nenhum formato configurado ainda.",
+      "noDeliveries": "Nenhuma entrega configurada ainda.",
+      "notDelivered": "Sem entrega: esta execução só mostra o resultado.",
+      "sample": "Resultado",
+      "sampleOf": "As primeiras {shown} de {total} linhas.",
+      "sampleAll": "Todas as linhas do resultado.",
+      "download": "Baixar o resultado",
+      "downloadUntil": "Disponível até {time}. O arquivo usa o seu idioma e o fuso do relatório.",
+      "downloadExpired": "O resultado desta execução não pode mais ser baixado.",
+      "tries": "{n} tentativas",
+      "resend": "Reenviar",
+      "resent": "Reenviada para {channel}",
+      "resendFailed": "O reenvio para {channel} falhou de novo",
+      "deletedChannel": "Canal excluído",
+      "fallbackToLink": "Arquivos grandes demais para anexar foram enviados como link.",
+      "filesUntil": "Os arquivos entregues podem ser baixados até {time}.",
+      "bytes": "{n} bytes",
+      "kb": "{n} KB",
+      "mb": "{n} MB"
+    },
+    "attemptStatus": {
+      "pending": "Aguardando",
+      "sending": "Enviando",
+      "sent": "Enviada",
+      "failed": "Falhou",
+      "skipped": "Pulada"
+    }
+  },
+  "channels": {
+    "help": "Para onde os relatórios são entregues: email, chat, webhooks, armazenamento e monitores.",
+    "add": "Adicionar canal",
+    "edit": "Editar",
+    "delete": "Excluir canal",
+    "deleted": "Canal excluído",
+    "saved": "Canal salvo",
+    "editTitle": "Editar {name}",
+    "emptyTitle": "Nenhum canal ainda",
+    "emptyBody": "Um canal é um destino com suas credenciais, como um servidor SMTP ou um workspace do Slack. Os relatórios entregam em canais.",
+    "askAdmin": "Peça a um administrador para adicionar um canal.",
+    "type": "Tipo",
+    "health": "Saúde",
+    "usedBy": "Usado por",
+    "lastActivity": "Última atividade",
+    "reportCount": "Nenhum relatório | 1 relatório | {n} relatórios",
+    "neverUsed": "Nunca",
+    "noFailures": "Nenhuma",
+    "unused": "Nenhum relatório entrega neste canal ainda.",
+    "lastSuccess": "Último sucesso",
+    "lastFailure": "Última falha",
+    "modes": "Modos de entrega",
+    "attachmentLimit": "arquivos de até {mb} MB",
+    "systemMailer": "Emails do sistema",
+    "systemMailerHelp": "Envia redefinições de senha e o \"enviar teste para mim\". Só um canal de email pode fazer isso.",
+    "name": "Nome",
+    "nameHint": "Letras minúsculas, dígitos e hífens. Usado para referenciar o canal no YAML.",
+    "chooseType": "Escolha um destino",
+    "chooseTypeHelp": "Você pode testar as configurações antes de salvar.",
+    "changeType": "Escolher outro destino",
+    "statuses": {
+      "unknown": "Ainda não usado",
+      "ok": "Saudável",
+      "failing": "Falhando"
+    },
+    "failingTitle": "A última entrega falhou ({when})",
+    "retryFailed": "Reenviar as entregas que falharam nas últimas 24 horas",
+    "retryQueued": "Nenhuma entrega na fila | 1 entrega está sendo reenviada | {n} entregas estão sendo reenviadas",
+    "retryNothing": "Não há entregas com falha para reenviar.",
+    "deleteImpact": "Excluir o canal {name}? As configurações e credenciais são removidas.",
+    "deleteInUse": "Este canal é usado por 1 relatório. Remova a entrega antes. | Este canal é usado por {n} relatórios. Remova as entregas antes.",
+    "test": {
+      "button": "Enviar um teste",
+      "running": "Enviando...",
+      "ok": "Teste enviado",
+      "okDetail": "O destino aceitou a mensagem de teste.",
+      "failed": "O teste falhou",
+      "to": "Enviar o email de teste para",
+      "toHint": "Seu endereço, por padrão."
+    },
+    "systemAlert": "Alerta de sistema",
+    "usedByAlert": {
+      "primary": "Alertas de sistema (primário)",
+      "fallback": "Alertas de sistema (alternativo)"
+    },
+    "tlsHint465": "A porta 465 costuma exigir TLS desde o início: escolha \"tls\", ou use a porta 587 com STARTTLS. Do contrário, o teste espera até o tempo limite.",
+    "tlsHint587": "A porta 587 costuma exigir STARTTLS: escolha \"starttls\", ou use a porta 465 com TLS. Do contrário, o teste espera até o tempo limite."
+  },
+  "deliveries": {
+    "title": "Entregas",
+    "help": "Para onde vai cada execução, e de que forma.",
+    "add": "Adicionar entrega",
+    "edit": "Editar entrega",
+    "editTitle": "Editar entrega",
+    "delete": "Excluir entrega",
+    "deleted": "Entrega excluída",
+    "saved": "Entrega salva",
+    "deleteImpact": "Parar de entregar este relatório em {channel}?",
+    "editorHelp": "Escolha o canal, o que enviar e como. A prévia usa o último resultado do relatório.",
+    "emptyTitle": "Este relatório ainda não entrega em lugar nenhum",
+    "emptyBody": "Adicione uma entrega para enviar cada execução a um canal: as linhas na mensagem, arquivos anexados ou links para baixá-los.",
+    "needChannel": "Adicione um canal antes.",
+    "channel": "Canal",
+    "mode": "Enviar como",
+    "formats": "Arquivos",
+    "modes": {
+      "inline": "Linhas na mensagem",
+      "attachment": "Arquivos anexados",
+      "link": "Links para download"
+    },
+    "modeHelp": {
+      "inline": "As primeiras linhas aparecem na própria mensagem.",
+      "attachment": "Os arquivos vão anexados; os grandes demais para o destino vão como link.",
+      "link": "A mensagem leva links que baixam os arquivos até expirarem."
+    },
+    "linksDisabled": "Links precisam do ROWBIRD_BASE_URL, o endereço público deste servidor. Defina-o para enviar links; anexos grandes também precisam dele.",
+    "linksDisabledShort": "precisa do ROWBIRD_BASE_URL",
+    "inlineRows": "Linhas mostradas na mensagem",
+    "inlineRowsHint": "Entre 1 e 200.",
+    "inlineWithFiles": "Mostrar também as primeiras linhas na mensagem",
+    "linkExpiry": "Os links expiram depois de",
+    "linkFallbackHint": "Usado quando um arquivo é grande demais para anexar.",
+    "days": "{n} dia | {n} dia | {n} dias",
+    "requireLogin": "Exigir login para baixar",
+    "enabled": "Ativa",
+    "disabled": "Desativada",
+    "testMe": "Enviar teste para mim",
+    "testChannel": "Enviar um teste para este canal",
+    "testQueued": "Rodando o relatório; o resultado vai para {email}.",
+    "testQueuedChannel": "Rodando o relatório; o resultado vai só para este canal.",
+    "preview": {
+      "heading": "Prévia",
+      "help": "Com o último resultado do relatório. Nada é enviado.",
+      "subject": "Assunto",
+      "title": "Prévia da mensagem"
+    }
+  },
+  "links": {
+    "help": "Links de download enviados pelas entregas. Revogue um para interrompê-lo na hora.",
+    "emptyTitle": "Nenhum link compartilhado",
+    "emptyBody": "Os links aparecem aqui quando uma entrega envia arquivos como link, ou quando um arquivo é grande demais para anexar.",
+    "activeOnly": "Só ativos",
+    "file": "Arquivo",
+    "status": "Status",
+    "expires": "Expira em",
+    "downloads": "Downloads",
+    "actions": "Ações",
+    "run": "execução",
+    "loginRequired": "exige login",
+    "revokedBy": "por {name}",
+    "lastDownload": "último em {time}",
+    "statuses": {
+      "active": "Ativo",
+      "expired": "Expirado",
+      "revoked": "Revogado"
+    },
+    "revoke": "Revogar link",
+    "revoked": "Link revogado",
+    "revokeImpact": "Quem tiver o link para {file} não vai mais conseguir baixá-lo. Isso não pode ser desfeito.",
+    "detail": {
+      "title": "Link compartilhado",
+      "help": "O que foi compartilhado, quem pode abrir e os downloads mais recentes.",
+      "report": "Relatório",
+      "created": "Criado em",
+      "access": "Quem pode abrir",
+      "anyone": "Qualquer pessoa com o link",
+      "revoked": "Revogado em",
+      "downloads": "Nenhum download | Um download | {n} downloads",
+      "when": "Quando",
+      "who": "Quem",
+      "ip": "Endereço IP",
+      "browser": "Navegador",
+      "anonymous": "Anônimo",
+      "agent": "{browser} no {os}",
+      "unknownAgent": "Desconhecido",
+      "noDownloadsTitle": "Ninguém abriu ainda",
+      "noDownloadsBody": "Cada download por este link aparece aqui com o horário, o usuário conectado quando houver e a origem.",
+      "latestOnly": "Só os 100 downloads mais recentes aparecem aqui."
+    }
+  },
+  "notifications": {
+    "bell": "Notificações",
+    "bellUnread": "Notificações, {count} não lidas",
+    "title": "Notificações",
+    "help": "Canais e relatórios que precisam de atenção. Falhas repetidas são contadas em uma única notificação até o problema acabar.",
+    "markAllRead": "Marcar todas como lidas",
+    "empty": "Nada precisa da sua atenção.",
+    "occurrences": "{count} vezes",
+    "resolved": "resolvida",
+    "unread": "Não lida",
+    "types": {
+      "channel_failing": "O canal {channel} está falhando",
+      "channel_recovered": "O canal {channel} voltou a funcionar",
+      "report_failing": "O relatório {report} falhou",
+      "report_recovered": "O relatório {report} voltou a funcionar",
+      "report_paused": "O relatório {report} foi pausado depois de {failures} falhas seguidas",
+      "gitops_failed": "O diretório de configuração não foi aplicado",
+      "report_orphaned": "O relatório {report} saiu do diretório de configuração e foi pausado",
+      "backup_failed": "O backup agendado falhou"
+    }
+  },
+  "health": {
+    "channelFailing": "O canal {name} está falhando",
+    "channelsFailing": "{count} canais estão falhando",
+    "reportFailing": "O relatório {name} está falhando",
+    "reportsFailing": "{count} relatórios estão falhando"
+  },
+  "home": {
+    "help": "O que roda a seguir, o que falhou recentemente e como estão as entregas.",
+    "successRate": {
+      "title": "Taxa de sucesso",
+      "help": "Execuções agendadas e execuções manuais que entregam. Execuções parciais contam como sem sucesso; as puladas ficam de fora.",
+      "7d": "Últimos 7 dias",
+      "30d": "Últimos 30 dias",
+      "count": "{succeeded} de {total} execuções",
+      "none": "Nenhuma execução ainda"
+    },
+    "nextRuns": {
+      "title": "Próximas execuções",
+      "empty": "Nenhum relatório está agendado. Relatórios rodam uma consulta em um agendamento e entregam o resultado."
+    },
+    "failures": {
+      "title": "Falhas recentes",
+      "empty": "Nenhuma execução falhou recentemente."
+    },
+    "channels": {
+      "title": "Canais com falha",
+      "empty": "Todos os canais estão funcionando."
+    },
+    "onboarding": {
+      "title": "Receba o seu primeiro relatório",
+      "help": "{done} de {total} passos feitos. Cada um leva um minuto.",
+      "hide": "Ocultar",
+      "done": "feito",
+      "todo": "a fazer",
+      "askAdmin": "Peça a um admin para adicionar uma conexão.",
+      "openReports": "Abrir relatórios",
+      "steps": {
+        "connection": {
+          "title": "Conecte um banco de dados",
+          "help": "O Rowbird só lê dele, nunca escreve."
+        },
+        "query": {
+          "title": "Escreva uma consulta",
+          "help": "O SQL cujo resultado você quer receber."
+        },
+        "report": {
+          "title": "Agende um relatório",
+          "help": "Quando rodar a consulta e para onde enviar o resultado."
+        },
+        "delivery": {
+          "title": "Receba a primeira entrega",
+          "help": "Espere o horário agendado, ou use \"Rodar agora\" ou \"Enviar teste para mim\" no relatório."
+        }
+      }
+    }
+  },
+  "ai": {
+    "panel": {
+      "title": "Assistente",
+      "shortcut": "Pedir ao assistente de IA (Ctrl/Cmd+I)",
+      "help": "Descreva a consulta que você precisa. A proposta aparece como uma mudança no SQL atual; nada roda até você aplicar e rodar a prévia.",
+      "off": "O assistente de IA não está configurado neste workspace.",
+      "setUp": "Configure em Configurações > IA",
+      "askAdmin": "Peça a um administrador para escolher um provedor em Configurações > IA.",
+      "prompt": "O que a consulta deve trazer?",
+      "placeholder": "Por exemplo: total de vendas por região neste mês, do maior para o menor",
+      "privacy": "O pedido e o schema vão para o provedor de IA; as linhas nunca são enviadas.",
+      "generate": "Propor",
+      "generating": "Pensando...",
+      "proposal": "Proposta",
+      "name": "Nome sugerido",
+      "params": "Novos parâmetros:",
+      "scheduleNote": "Agenda sugerida para um relatório: {schedule}.",
+      "apply": "Aplicar",
+      "discard": "Descartar",
+      "applyNote": "Aplicar substitui o SQL do editor. Revise e rode a prévia antes de salvar.",
+      "applied": "Proposta aplicada. Revise e rode a prévia."
+    },
+    "schedule": {
+      "label": "Descreva quando rodar",
+      "placeholder": "Por exemplo: todo dia útil às 8 da manhã",
+      "suggest": "Sugerir"
+    },
+    "warnings": {
+      "not_read_only": "Este SQL pode alterar dados. As consultas rodam em transações somente leitura, mas revise com cuidado.",
+      "multiple_statements": "Este SQL tem mais de uma instrução; as conexões rodam uma só, a menos que permitam mais.",
+      "schedule_invalid": "A agenda sugerida não era válida e ficou de fora.",
+      "schema_truncated": "O schema é grande, então só parte dele foi enviada. Cite pelo nome as tabelas de que você precisa.",
+      "no_schedule": "Não foi possível transformar a descrição em uma agenda."
+    }
+  },
+  "config": {
+    "title": "Importar / exportar",
+    "help": "Relatórios, consultas, conexões e canais em YAML: para copiar para outra instância, guardar no Git ou compartilhar. Segredos nunca são exportados.",
+    "export": {
+      "button": "Exportar",
+      "all": "Exportar tudo",
+      "selected": "Exportar {n} selecionados",
+      "pick": "Selecionar",
+      "pickOne": "Selecionar {title}",
+      "titleAll": "Exportar o workspace",
+      "titleSome": "Exportar {n} relatório | Exportar {n} relatório | Exportar {n} relatórios",
+      "help": "Cada relatório vai com a sua consulta.",
+      "withConnections": "Incluir as conexões que eles usam",
+      "withChannels": "Incluir os canais para onde entregam",
+      "secrets": "Senhas e tokens não são exportados: o arquivo indica uma variável de ambiente para cada um, que a importação pede.",
+      "download": "Baixar YAML"
+    },
+    "import": {
+      "file": "Escolher um arquivo",
+      "paste": "Ou cole o YAML",
+      "analyze": "Verificar",
+      "errors": "Os documentos têm problemas:",
+      "line": "linha {line}",
+      "missingTitle": "Referências faltando",
+      "missingHelp": "Os documentos usam conexões ou canais que não existem aqui. Escolha existentes para usar no lugar.",
+      "choose": "Escolha...",
+      "secretsTitle": "Segredos",
+      "secretsHelp": "Valores para os segredos que os documentos pedem. Eles ficam guardados criptografados com o recurso.",
+      "secretRequired": "Obrigatório ({env}).",
+      "secretOptional": "Deixe em branco para manter o valor atual ({env}).",
+      "planTitle": "Plano",
+      "summary": "{create} para criar, {update} para atualizar, {unchanged} sem mudança, {skip} pulados, {conflict} para decidir.",
+      "as": "como {name}",
+      "decide": "Decidir...",
+      "policies": {
+        "overwrite": "Sobrescrever",
+        "copy": "Importar como cópia",
+        "skip": "Pular"
+      },
+      "actions": {
+        "create": "Criar",
+        "update": "Atualizar",
+        "unchanged": "Sem mudança",
+        "conflict": "Existe e é diferente",
+        "skip": "Pular"
+      },
+      "kinds": {
+        "Connection": "Conexão",
+        "Channel": "Canal",
+        "Query": "Consulta",
+        "Report": "Relatório"
+      },
+      "none": "(nenhum)",
+      "secretChanges": "(o segredo muda)",
+      "apply": "Aplicar",
+      "blocked": "Resolva os itens acima para aplicar.",
+      "applied": "Documentos aplicados",
+      "done": "Tudo foi aplicado de uma vez."
+    },
+    "managed": {
+      "title": "Gerenciado pelo diretório de configuração",
+      "body": "Isto vem do diretório GitOps e é aplicado de novo quando o servidor inicia, por isso fica somente leitura aqui.",
+      "detach": "Editar mesmo assim",
+      "detachImpact": "Desvincular do diretório de configuração? Você poderá alterar aqui, e o diretório deixa de mudar isto até um administrador devolvê-lo.",
+      "detached": "Desvinculado: você pode alterar aqui.",
+      "attached": "Devolvido ao diretório de configuração; ele aplica no próximo início.",
+      "detachedBody": "Desvinculado do diretório de configuração: as mudanças feitas aqui são mantidas.",
+      "attach": "Devolver ao diretório",
+      "orphan": "Este relatório saiu do diretório de configuração e por isso foi pausado. Recoloque o documento para retomá-lo, ou exclua o relatório.",
+      "orphanBadge": "Órfão"
+    }
+  },
+  "units": {
+    "bytes": "{n} bytes",
+    "kb": "{n} KB",
+    "mb": "{n} MB",
+    "gb": "{n} GB",
+    "tb": "{n} TB"
+  },
+  "passkeys": {
+    "title": "Passkeys",
+    "help": "Entre com sua digital, rosto ou PIN do dispositivo em vez de uma senha. Uma passkey também conta como autenticação em dois fatores.",
+    "unavailable": "Passkeys não estão disponíveis: o servidor precisa da sua URL pública (ROWBIRD_BASE_URL), e o navegador precisa ter suporte.",
+    "add": "Adicionar passkey",
+    "addHelp": "O navegador vai perguntar onde salvá-la: neste dispositivo, no seu celular ou em uma chave de segurança.",
+    "name": "Nome",
+    "nameHint": "Algo para reconhecê-la, como \"Notebook do trabalho\".",
+    "create": "Continuar",
+    "added": "Passkey adicionada.",
+    "addedAt": "Adicionada em {when}",
+    "lastUsed": "último uso em {when}",
+    "neverUsed": "nunca usada",
+    "synced": "Sincronizada",
+    "rename": "Renomear",
+    "remove": "Remover",
+    "removeTitle": "Remover a passkey {name}",
+    "removeHelp": "Você não vai mais conseguir entrar com ela. Se for seu único segundo fator e o workspace exigir um, vai ser preciso configurar outro.",
+    "removed": "Passkey removida.",
+    "none": "Você ainda não tem passkeys."
+  },
+  "palette": {
+    "open": "Buscar ou ir para…",
+    "title": "Paleta de comandos",
+    "help": "Digite para encontrar uma página, uma ação, ou um relatório, consulta, conexão ou canal.",
+    "placeholder": "Encontre uma página, relatório, consulta, conexão ou canal…",
+    "empty": "Nada encontrado.",
+    "create": "criar",
+    "groups": {
+      "actions": "Criar",
+      "pages": "Páginas",
+      "reports": "Relatórios",
+      "queries": "Consultas",
+      "connections": "Conexões",
+      "channels": "Canais"
+    }
+  },
+  "forgotPassword": {
+    "title": "Redefinir a senha",
+    "help": "Informe o email da sua conta e enviaremos um link para escolher uma nova senha.",
+    "submit": "Enviar o link",
+    "sent": "Se {email} tiver uma conta aqui, um link para redefinir a senha está a caminho. Ele funciona uma vez, em até 30 minutos. Confira também a caixa de spam.",
+    "back": "Voltar para a entrada"
+  },
+  "resetPassword": {
+    "title": "Escolha uma nova senha",
+    "help": "Escolha uma nova senha para a sua conta. Você vai sair de todos os dispositivos.",
+    "submit": "Salvar a nova senha",
+    "done": "Sua senha foi alterada. Entre com ela agora.",
+    "signIn": "Entrar",
+    "again": "Pedir um novo link"
+  }
+}

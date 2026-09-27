@@ -1,0 +1,31 @@
+# OS and editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Go
+/bin/
+/tmp/
+coverage.out
+coverage.html
+
+# Local runtime data (make dev)
+/.data/
+
+# Web
+web/node_modules/
+web/dist/*
+!web/dist/.gitkeep
+web/coverage/
+web/test-results/
+web/playwright-report/
+
+# Docs site
+docs/site/node_modules/
+docs/site/.vitepress/cache/
+docs/site/.vitepress/dist/
+web/*.tsbuildinfo
+
+# Release (goreleaser)
+/dist/

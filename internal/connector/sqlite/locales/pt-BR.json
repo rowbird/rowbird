@@ -1,0 +1,6 @@
+{
+  "plugin.sqlite.description": "Um arquivo de banco SQLite no servidor do Rowbird, aberto só para leitura.",
+  "plugin.sqlite.name": "SQLite",
+  "plugin.sqlite.path.help": "Caminho absoluto do arquivo. Ele precisa estar dentro de um dos diretórios permitidos por ROWBIRD_SQLITE_DIRS.",
+  "plugin.sqlite.path.label": "Arquivo do banco"
+}

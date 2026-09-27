@@ -1,0 +1,11 @@
+{
+  "plugin.uptime_kuma.description": "Reports every run to an Uptime Kuma push monitor: up, or down when it fails.",
+  "plugin.uptime_kuma.message.default": "{{report.name}}: {{run.status}}, {{run.rows}} rows",
+  "plugin.uptime_kuma.message.label": "Message",
+  "plugin.uptime_kuma.name": "Uptime Kuma",
+  "plugin.uptime_kuma.push_url.help": "The URL of a push monitor, as Uptime Kuma shows it. The query string is added by Rowbird.",
+  "plugin.uptime_kuma.push_url.label": "Push URL",
+  "plugin.uptime_kuma.skipped_status.down": "Report down",
+  "plugin.uptime_kuma.skipped_status.label": "When the condition skips a run",
+  "plugin.uptime_kuma.skipped_status.up": "Report up"
+}

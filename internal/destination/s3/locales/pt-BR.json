@@ -1,0 +1,17 @@
+{
+  "plugin.s3.access_key.label": "Chave de acesso",
+  "plugin.s3.bucket.label": "Bucket",
+  "plugin.s3.content_disposition.attachment": "Baixar o arquivo",
+  "plugin.s3.content_disposition.inline": "Mostrar no navegador",
+  "plugin.s3.content_disposition.label": "Ao abrir no navegador",
+  "plugin.s3.description": "Envia os arquivos de cada execução para um bucket compatível com S3 (AWS, MinIO, Cloudflare R2 e outros).",
+  "plugin.s3.endpoint.help": "Na AWS, https://s3.amazonaws.com. Em outros provedores, o endereço S3 deles.",
+  "plugin.s3.endpoint.label": "Endpoint",
+  "plugin.s3.name": "Bucket S3",
+  "plugin.s3.path.help": "Template Mustache. {{format}} é a extensão do arquivo.",
+  "plugin.s3.path.label": "Caminho do arquivo",
+  "plugin.s3.path_style.help": "Necessário no MinIO e em alguns outros provedores.",
+  "plugin.s3.path_style.label": "Endereços no estilo de caminho",
+  "plugin.s3.region.label": "Região",
+  "plugin.s3.secret_key.label": "Chave secreta"
+}

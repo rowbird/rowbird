@@ -1,0 +1,11 @@
+{
+  "format.bytes": "({n} bytes)",
+  "format.generatedAt": "Generated on {time}",
+  "format.limitCut": "The result was cut at the row limit.",
+  "format.no": "no",
+  "format.noRows": "No rows.",
+  "format.page": "Page {n} of {total}",
+  "format.showing": "Showing {shown} of {total} rows.",
+  "format.viewFull": "View the full report",
+  "format.yes": "yes"
+}

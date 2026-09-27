@@ -1,0 +1,129 @@
+{
+  "errors": {
+    "ai": {
+      "not_configured": "O assistente de IA não está configurado. Um administrador pode escolher um provedor em Configurações > IA.",
+      "no_schema": "O schema da conexão ainda não foi lido. Atualize-o na página da conexão antes.",
+      "too_many_requests": "Muitos pedidos ao assistente. Espere alguns minutos e tente de novo.",
+      "auth_failed": "O provedor de IA recusou a chave de API. Confira em Configurações > IA.",
+      "rejected": "O provedor de IA recusou o pedido.",
+      "unreachable": "Não foi possível alcançar o provedor de IA.",
+      "rate_limited": "O provedor de IA está limitando os pedidos. Tente de novo mais tarde.",
+      "timeout": "O provedor de IA demorou demais para responder.",
+      "network_blocked": "O endereço do provedor de IA está bloqueado pela política de rede.",
+      "failed": "O provedor de IA não conseguiu responder.",
+      "invalid_output": "A resposta da IA não pôde ser usada. Tente escrever o pedido de outro jeito."
+    },
+    "auth": {
+      "challenge_expired": "A tentativa de login expirou. Entre novamente",
+      "csrf_failed": "Não foi possível verificar a requisição. Recarregue a página e tente de novo",
+      "forbidden": "Você não tem permissão para fazer isso",
+      "invalid_credentials": "Email ou senha incorretos",
+      "locked": "Muitas tentativas sem sucesso. A conta está temporariamente bloqueada",
+      "mfa_invalid": "Código de verificação incorreto",
+      "mfa_setup_required": "Você precisa configurar a autenticação em dois fatores antes de continuar",
+      "password_change_required": "Você precisa trocar sua senha antes de continuar",
+      "rate_limited": "Muitas tentativas. Aguarde um pouco e tente de novo",
+      "unauthenticated": "Você precisa entrar",
+      "oidc_unavailable": "O login único não está configurado",
+      "oidc_failed": "O login único falhou",
+      "oidc_no_account": "Não há conta para esta identidade",
+      "oidc_domain_not_allowed": "Este domínio de email não pode entrar",
+      "oidc_email_unverified": "O provedor não verificou este email",
+      "oidc_discovery_failed": "Não foi possível acessar o provedor de identidade",
+      "reset_invalid": "Este link de redefinição de senha é inválido, já foi usado ou expirou"
+    },
+    "channel": {
+      "name_taken": "Já existe um canal com este nome",
+      "in_use": "O canal é usado por relatórios e não pode ser excluído"
+    },
+    "conflict": {
+      "duplicate": "Já existe um recurso com este valor",
+      "version": "Este recurso foi alterado por outra pessoa. Recarregue e tente novamente"
+    },
+    "connection": {
+      "auth_failed": "O banco recusou o usuário ou a senha",
+      "database_not_found": "O banco não foi encontrado, ou o usuário não tem acesso a ele",
+      "failed": "A conexão falhou",
+      "host_unreachable": "Não foi possível alcançar o servidor do banco",
+      "in_use": "A conexão é usada por consultas e não pode ser excluída",
+      "name_taken": "Já existe uma conexão com este nome",
+      "network_blocked": "A política de rede deste Rowbird não permite este endereço",
+      "path_not_allowed": "O arquivo está fora dos diretórios permitidos para SQLite",
+      "ssh_auth_failed": "O host SSH recusou o usuário ou a chave",
+      "ssh_host_key_mismatch": "A chave do host SSH mudou desde que foi confirmada",
+      "ssh_host_key_unknown": "A chave do host SSH precisa ser confirmada",
+      "ssh_unreachable": "Não foi possível alcançar o host SSH",
+      "timeout": "O servidor do banco não respondeu a tempo",
+      "tls_failed": "Não foi possível estabelecer a conexão criptografada (TLS)",
+      "tls_required": "O servidor do banco exige uma conexão criptografada (TLS)"
+    },
+    "delivery": {
+      "no_system_mailer": "Nenhum canal de email está marcado para emails do sistema. Marque um em Canais para enviar testes por email.",
+      "not_failed": "Só uma entrega que falhou pode ser reenviada.",
+      "not_resendable": "Esta entrega não pode ser reenviada: foi um teste para você, ou a entrega foi excluída."
+    },
+    "gitops": {
+      "not_managed": "Isto não é gerenciado pelo diretório de configuração.",
+      "not_detached": "Isto não foi desvinculado do diretório de configuração."
+    },
+    "internal": "Algo deu errado no servidor",
+    "link": {
+      "not_found": "Este link não existe. Confira se ele foi copiado inteiro.",
+      "expired": "Este link expirou ou foi revogado. Peça um novo a quem compartilhou.",
+      "login_required": "Entre para abrir este link.",
+      "revoked": "O link já foi revogado"
+    },
+    "query": {
+      "cancelled": "A consulta foi cancelada",
+      "failed": "O banco não conseguiu executar a consulta",
+      "in_use": "A consulta é usada por relatórios e não pode ser excluída",
+      "multiple_statements": "Só um comando é permitido; a conexão não permite vários",
+      "read_only": "A consulta tentou alterar dados, e o Rowbird só lê",
+      "slug_taken": "Já existe uma consulta com este slug",
+      "timeout": "A consulta passou do tempo limite"
+    },
+    "report": {
+      "slug_taken": "Já existe um relatório com este slug",
+      "run_active": "O relatório tem uma execução em andamento. Aguarde ou cancele antes"
+    },
+    "request": {
+      "invalid": "A requisição é inválida",
+      "method_not_allowed": "Este método não é permitido para este recurso",
+      "unsupported_media_type": "As requisições devem ser enviadas como JSON"
+    },
+    "resource": {
+      "not_found": "O recurso não foi encontrado",
+      "managed_by_gitops": "Isto é gerenciado pelo diretório de configuração. Um administrador pode desvinculá-lo para alterar aqui."
+    },
+    "route": {
+      "not_found": "Não existe endpoint da API neste caminho"
+    },
+    "run": {
+      "not_active": "A execução já terminou",
+      "result_unavailable": "O resultado desta execução não está mais disponível"
+    },
+    "setup": {
+      "completed": "O Rowbird já está configurado",
+      "invalid_token": "O token de configuração está incorreto"
+    },
+    "totp": {
+      "already_enabled": "A autenticação em dois fatores já está ativa",
+      "not_enabled": "A autenticação em dois fatores não está ativa",
+      "not_started": "Comece a configuração em dois fatores primeiro"
+    },
+    "user": {
+      "email_taken": "Já existe um usuário com este email",
+      "last_admin": "O workspace precisa de pelo menos um admin ativo",
+      "self_modification": "Você não pode mudar o próprio papel nem desativar a própria conta"
+    },
+    "validation": {
+      "failed": "Alguns campos são inválidos",
+      "not_found": "Não existe."
+    },
+    "passkey": {
+      "unavailable": "Passkeys precisam da URL pública deste servidor (ROWBIRD_BASE_URL)",
+      "failed": "Não foi possível verificar a passkey",
+      "exists": "Esta passkey já está cadastrada"
+    }
+  }
+}

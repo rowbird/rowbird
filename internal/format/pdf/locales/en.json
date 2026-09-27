@@ -1,0 +1,9 @@
+{
+  "plugin.format.pdf.description": "A printable document with the report's title, a table and page numbers.",
+  "plugin.format.pdf.name": "PDF",
+  "plugin.format.pdf.orientation.auto": "Automatic",
+  "plugin.format.pdf.orientation.help": "Automatic uses landscape pages when the result has more than six columns.",
+  "plugin.format.pdf.orientation.label": "Orientation",
+  "plugin.format.pdf.orientation.landscape": "Landscape",
+  "plugin.format.pdf.orientation.portrait": "Portrait"
+}

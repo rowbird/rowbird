@@ -1,0 +1,85 @@
+apiVersion: rowbird.dev/v1
+kind: Connection
+metadata:
+  name: shop
+spec:
+  driver: sqlite
+  config:
+    path: /data/sqlite/shop.db
+  options:
+    queryTimeoutSeconds: 60
+    maxRows: 100000
+    allowMultiStatement: false
+---
+apiVersion: rowbird.dev/v1
+kind: Channel
+metadata:
+  name: erp-hook
+spec:
+  type: webhook
+  config:
+    method: POST
+    url: https://erp.example.com/hook
+  secrets:
+    hmac_secret: ${env:ROWBIRD_CHANNEL_ERP_HOOK_HMAC_SECRET}
+---
+apiVersion: rowbird.dev/v1
+kind: Query
+metadata:
+  name: orders-by-region
+  title: Orders by region
+  description: Totals per region
+spec:
+  connection: shop
+  sql: select region, sum(total) as total from orders where region = {{region}} group by region
+  params:
+    - name: region
+      type: text
+      default: south
+---
+apiVersion: rowbird.dev/v1
+kind: Report
+metadata:
+  name: daily-orders
+  title: Daily orders
+  description: Orders per region
+spec:
+  query:
+    ref: orders-by-region
+  schedule:
+    cron: 0 7 * * 1-5
+    timezone: America/Sao_Paulo
+  condition:
+    match: any
+    rules:
+      - type: row_count
+        op: gt
+        value: 2
+      - type: has_rows
+  params:
+    region: north
+  enabled: true
+  run:
+    maxRows: 500
+    retryMax: 3
+    retryBackoffSeconds: 60
+    misfire: skip
+    overlap: queue
+    autoPauseAfter: 7
+    notifyOwner: false
+  deliveries:
+    - channel: erp-hook
+      mode: link
+      formats:
+        - csv
+        - xlsx
+      enabled: true
+      inline:
+        rows: 15
+        withFiles: false
+      link:
+        expiresIn: 3d
+        requireLogin: true
+      options:
+        include_links: true
+        include_rows: 5

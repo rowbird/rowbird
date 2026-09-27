@@ -1,0 +1,14 @@
+{
+  "notify.channelFailing.text": "Deliveries through the {channel_type} channel {channel} are failing: {error}. Rowbird counts further failures on this alert and sends a message when the channel works again.",
+  "notify.channelFailing.title": "Channel {channel} is failing",
+  "notify.channelRecovered.text": "Deliveries through the {channel_type} channel {channel} work again.",
+  "notify.channelRecovered.title": "Channel {channel} recovered",
+  "notify.passwordReset.text": "Someone asked to reset the password of your Rowbird account. Open the link below within {minutes} minutes to choose a new one; it works once. If it was not you, ignore this email: your password stays the same.",
+  "notify.passwordReset.title": "Reset your Rowbird password",
+  "notify.reportFailing.text": "A run of {report} failed with {error_code}. Rowbird counts further failures on this alert and sends a message when the report succeeds again.",
+  "notify.reportFailing.title": "Report {report} failed",
+  "notify.reportPaused.text": "{report} failed {failures} times in a row, so it was paused. It will not run on its schedule until someone resumes it.",
+  "notify.reportPaused.title": "Report {report} was paused",
+  "notify.reportRecovered.text": "{report} ran successfully again.",
+  "notify.reportRecovered.title": "Report {report} recovered"
+}

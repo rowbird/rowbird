@@ -1,0 +1,61 @@
+# Rowbird in production with Docker Compose: one instance, SQLite in the data volume, scheduled
+# backups, and Caddy in front for HTTPS. See https://docs.rowbird.dev/install/compose.
+#
+#   cp .env.example .env               # then edit it
+#   mkdir -p secrets && openssl rand -base64 32 > secrets/master.key
+#   sudo chown 65532:65532 secrets/master.key && sudo chmod 400 secrets/master.key
+#   docker compose up -d
+#
+# The image runs as uid 65532 and Compose mounts the secret file as it is on the host, hence chown.
+#
+# Back up secrets/master.key somewhere else: backups cannot be read without it.
+name: rowbird
+
+services:
+  rowbird:
+    # Pin an exact version and upgrade on purpose (https://docs.rowbird.dev/operations/upgrades).
+    image: ghcr.io/rowbird/rowbird:${ROWBIRD_VERSION:?set ROWBIRD_VERSION in .env}
+    restart: unless-stopped
+    environment:
+      ROWBIRD_BASE_URL: https://${ROWBIRD_DOMAIN:?set ROWBIRD_DOMAIN in .env}
+      ROWBIRD_MASTER_KEY_FILE: /run/secrets/master_key
+      # The Compose network, where Caddy's requests come from; adjust if yours uses another range.
+      ROWBIRD_TRUSTED_PROXIES: 172.16.0.0/12
+      ROWBIRD_LOG_FORMAT: json
+      ROWBIRD_METRICS_TOKEN: ${ROWBIRD_METRICS_TOKEN:-}
+      ROWBIRD_BACKUP_SCHEDULE: "0 3 * * *"
+      ROWBIRD_BACKUP_KEEP: "14"
+      ROWBIRD_NETWORK_POLICY: ${ROWBIRD_NETWORK_POLICY:-open}
+    secrets:
+      - master_key
+    volumes:
+      - rowbird-data:/data
+    # Only Caddy talks to Rowbird; publish 8080 instead if another proxy runs on the host.
+    expose:
+      - "8080"
+    stop_grace_period: 40s # a little more than ROWBIRD_SHUTDOWN_TIMEOUT (30s)
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      ROWBIRD_DOMAIN: ${ROWBIRD_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - rowbird
+
+secrets:
+  master_key:
+    file: ./secrets/master.key
+
+volumes:
+  rowbird-data:
+  caddy-data:
+  caddy-config:

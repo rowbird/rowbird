@@ -1,0 +1,19 @@
+# Labels for rowbird/rowbird, created once the public repository exists (for example with
+# `gh label create` for each entry, or a label sync action).
+- { name: bug, color: d73a4a, description: Something does not work as documented }
+- { name: enhancement, color: a2eeef, description: A new feature or an improvement }
+- { name: triage, color: ededed, description: Waiting for a maintainer to look at it }
+- { name: documentation, color: 0075ca, description: Docs site, README or examples }
+- { name: security, color: b60205, description: Security hardening (vulnerabilities go through SECURITY.md) }
+- { name: good first issue, color: 7057ff, description: A well-scoped task for a first contribution }
+- { name: help wanted, color: 008672, description: Maintainers would welcome a contribution }
+- { name: plugin, color: fbca04, description: Connectors, destinations, formats, conditions, AI providers }
+- { name: connector, color: fef2c0, description: A database connector }
+- { name: destination, color: fef2c0, description: A delivery destination }
+- { name: i18n, color: c5def5, description: Translations and locales }
+- { name: ui, color: bfdadc, description: The web interface }
+- { name: api, color: d4c5f9, description: The HTTP API and OpenAPI contract }
+- { name: operations, color: c2e0c6, description: Install, backups, upgrades, observability }
+- { name: breaking, color: e11d21, description: Changes behavior in an incompatible way }
+- { name: duplicate, color: cfd3d7, description: Already reported }
+- { name: wontfix, color: ffffff, description: Out of scope for Rowbird }

@@ -1,0 +1,7 @@
+{$ROWBIRD_DOMAIN} {
+	encode zstd gzip
+	reverse_proxy rowbird:8080 {
+		# Server-sent events (live run updates) must not be buffered.
+		flush_interval -1
+	}
+}

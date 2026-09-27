@@ -1,0 +1,32 @@
+name: New connector
+description: Propose support for another database.
+labels: ["plugin", "connector", "triage"]
+body:
+  - type: input
+    id: database
+    attributes:
+      label: Database
+      placeholder: ClickHouse, Oracle, DuckDB, ...
+    validations:
+      required: true
+  - type: input
+    id: driver
+    attributes:
+      label: Pure Go driver
+      description: Rowbird builds without CGO. Link a pure Go driver if you know one.
+  - type: textarea
+    id: readonly
+    attributes:
+      label: Read-only and timeouts
+      description: How can the database enforce read-only access, statement timeouts and cancellation?
+  - type: textarea
+    id: config
+    attributes:
+      label: Configuration fields
+      description: Host, port, TLS, authentication options... Mark the secret ones.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to implement it (see the plugin development guide)

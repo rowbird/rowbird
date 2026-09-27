@@ -1,0 +1,9 @@
+{
+  "plugin.format.pdf.description": "Um documento para impressão com o título do relatório, uma tabela e números de página.",
+  "plugin.format.pdf.name": "PDF",
+  "plugin.format.pdf.orientation.auto": "Automática",
+  "plugin.format.pdf.orientation.help": "Automática usa páginas deitadas quando o resultado tem mais de seis colunas.",
+  "plugin.format.pdf.orientation.label": "Orientação",
+  "plugin.format.pdf.orientation.landscape": "Paisagem",
+  "plugin.format.pdf.orientation.portrait": "Retrato"
+}

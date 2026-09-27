@@ -1,0 +1,13 @@
+{
+  "plugin.telegram.api_base.help": "Altere só para um servidor próprio da Bot API.",
+  "plugin.telegram.api_base.label": "Endereço da Bot API",
+  "plugin.telegram.bot_token.help": "Do BotFather. Adicione o bot ao chat antes de entregar nele.",
+  "plugin.telegram.bot_token.label": "Token do bot",
+  "plugin.telegram.chat_id.help": "O id do chat (como -1001234567890) ou @nomedocanal.",
+  "plugin.telegram.chat_id.label": "Chat",
+  "plugin.telegram.description": "Envia cada execução para um chat do Telegram por meio de um bot, com o resultado e os arquivos.",
+  "plugin.telegram.message.default": "<b>{{report.name}}</b>\n{{run.rows}} linhas · {{run.started_at}}",
+  "plugin.telegram.message.label": "Mensagem",
+  "plugin.telegram.name": "Telegram",
+  "plugin.telegram.silent.label": "Enviar sem notificação"
+}

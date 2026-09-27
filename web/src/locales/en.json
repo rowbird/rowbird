@@ -1,0 +1,1362 @@
+{
+  "app": {
+    "name": "Rowbird",
+    "tagline": "Your SQL results, delivered"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "home": "Home",
+    "reports": "Reports",
+    "queries": "Queries",
+    "connections": "Connections",
+    "channels": "Channels",
+    "runs": "Runs",
+    "links": "Links",
+    "settings": "Settings",
+    "groups": {
+      "build": "Build",
+      "follow": "Follow",
+      "setup": "Set up"
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you are looking for does not exist.",
+    "action": "Go to Home"
+  },
+  "theme": {
+    "label": "Theme",
+    "toggle": "Change theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": {
+    "label": "Language"
+  },
+  "userMenu": {
+    "label": "User menu",
+    "signOut": "Sign out"
+  },
+  "ui": {
+    "close": "Close",
+    "notifications": "Notifications",
+    "sidebar": {
+      "toggle": "Toggle sidebar",
+      "title": "Navigation",
+      "description": "Links to every section of Rowbird."
+    }
+  },
+  "common": {
+    "actions": "Actions",
+    "cancel": "Cancel",
+    "copy": "Copy",
+    "copied": "Copied",
+    "download": "Download",
+    "loadMore": "Load more",
+    "save": "Save",
+    "shownOnce": "This is shown only once. Copy it now and keep it somewhere safe."
+  },
+  "fields": {
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm password",
+    "passwordHint": "At least 10 characters. A few unrelated words make a strong, memorable password.",
+    "passwordMismatch": "The passwords do not match",
+    "language": "Language",
+    "timezone": "Time zone"
+  },
+  "setup": {
+    "title": "Set up Rowbird",
+    "intro": "Create the first administrator account. You can invite the rest of your team afterwards.",
+    "token": "Setup token",
+    "tokenHint": "The value of ROWBIRD_SETUP_TOKEN configured on the server.",
+    "submit": "Create account and continue",
+    "masterKey": {
+      "title": "Back up the master key now",
+      "body": "Rowbird generated the key that encrypts database passwords and channel credentials. Without it, those secrets cannot be recovered, and backups of the database are useless. Copy this file to a safe place outside the server:",
+      "ack": "I have backed up the master key"
+    }
+  },
+  "login": {
+    "title": "Sign in",
+    "submit": "Sign in",
+    "secondFactorTitle": "Verify it is you",
+    "codeHelp": "Enter the 6-digit code from your authenticator app.",
+    "recoveryHelp": "Enter one of your recovery codes. Each code works only once.",
+    "recoveryCode": "Recovery code",
+    "verify": "Verify",
+    "useRecovery": "Use a recovery code instead",
+    "useAuthenticator": "Use the authenticator app instead",
+    "or": "or",
+    "withPasskey": "Sign in with a passkey",
+    "usePasskey": "Use a passkey",
+    "passkeyHelp": "Confirm with the passkey on this device, your phone or your security key.",
+    "sso": "Sign in with single sign-on",
+    "forgot": "Forgot your password?"
+  },
+  "changePassword": {
+    "title": "Change password",
+    "intro": "Your password was set by an administrator. Choose your own password to continue.",
+    "submit": "Change password",
+    "done": "Password changed. Your other sessions were signed out."
+  },
+  "twoFactorSetup": {
+    "title": "Set up two-factor authentication",
+    "intro": "An administrator requires two-factor authentication for everyone. Set it up to continue.",
+    "usePasskey": "Use a passkey",
+    "orApp": "or set up an authenticator app"
+  },
+  "twoFactor": {
+    "title": "Two-factor authentication",
+    "short": "2FA",
+    "help": "Ask for a code from an authenticator app when signing in, in addition to the password.",
+    "on": "On",
+    "off": "Off",
+    "enable": "Turn on two-factor authentication",
+    "enabled": "Two-factor authentication is on.",
+    "disable": "Turn off two-factor authentication",
+    "disabled": "Two-factor authentication is off.",
+    "disableHelp": "Your account will be protected by the password alone. Confirm with your password.",
+    "regenerate": "New recovery codes",
+    "regenerateHelp": "Your current recovery codes will stop working. Confirm with your password.",
+    "scan": "Scan this QR code with an authenticator app such as Google Authenticator, 1Password or Aegis, then enter the code it shows.",
+    "qrAlt": "QR code to add Rowbird to an authenticator app",
+    "manualEntry": "Cannot scan? Enter this key manually",
+    "code": "Verification code",
+    "codesTitle": "Recovery codes",
+    "codesHelp": "Use one of these codes to sign in if you lose your authenticator. Each code works once. Store them somewhere safe; they will not be shown again.",
+    "savedCodes": "I have saved my recovery codes"
+  },
+  "profile": {
+    "title": "Profile",
+    "details": "Your details",
+    "saved": "Profile saved.",
+    "passwordHelp": "Changing the password signs out your other sessions."
+  },
+  "sessions": {
+    "title": "Sessions",
+    "help": "Browsers where you are signed in. Sign out any you do not recognize.",
+    "current": "This browser",
+    "revoke": "Sign out",
+    "lastSeen": "last active {when}",
+    "unknownDevice": "Unknown device",
+    "signOutEverywhere": "Sign out everywhere",
+    "signOutEverywhereHelp": "All {count} sessions will be signed out, including this one."
+  },
+  "roles": {
+    "viewer": "Viewer",
+    "editor": "Editor",
+    "admin": "Admin",
+    "viewerHelp": "Can see everything except secrets, view runs and download results.",
+    "editorHelp": "Viewer, plus writing queries, managing reports and deliveries, and running reports.",
+    "adminHelp": "Editor, plus connections, channels, users, API keys and settings."
+  },
+  "scopes": {
+    "read": "Read",
+    "run": "Run",
+    "write": "Write",
+    "admin": "Admin",
+    "readHelp": "Read everything an admin can read, except secrets.",
+    "runHelp": "Read, plus running reports.",
+    "writeHelp": "Run, plus creating and changing queries, reports and deliveries.",
+    "adminHelp": "Full access, including users, API keys and settings."
+  },
+  "settings": {
+    "sections": "Settings sections",
+    "saved": "Settings saved.",
+    "readOnly": "Only admins can change these settings.",
+    "general": {
+      "title": "General",
+      "help": "Defaults for new users and reports.",
+      "defaultLocale": "Default language",
+      "defaultTimezone": "Default time zone",
+      "timezoneHint": "Used for new reports and built-in date parameters."
+    },
+    "users": {
+      "title": "Users and roles",
+      "help": "People who can sign in to this Rowbird and what each of them can do.",
+      "add": "Add user",
+      "addHelp": "The user gets a temporary password that you share with them. They choose their own password at the first sign-in.",
+      "created": "User created",
+      "role": "Role",
+      "status": "Status",
+      "lastLogin": "Last sign-in",
+      "never": "Never",
+      "active": "Active",
+      "disabled": "Disabled",
+      "locked": "Locked",
+      "temporaryPassword": "Temporary password",
+      "temporaryPasswordHelp": "Share this temporary password with {email} through a private channel. They must change it when they first sign in.",
+      "changeRole": "Change role",
+      "changeRoleImpact": "{name} ({email}) will become {role} and will be signed out of every session.",
+      "disable": "Disable user",
+      "disableImpact": "{name} ({email}) will be signed out everywhere, their API keys will be revoked and they will not be able to sign in.",
+      "enable": "Enable user",
+      "enableImpact": "{name} ({email}) will be able to sign in again. Their API keys stay revoked.",
+      "resetPassword": "Reset password",
+      "resetImpact": "{name} ({email}) will be signed out everywhere and will get a new temporary password.",
+      "resetDone": "Password reset",
+      "disable2fa": "Turn off two-factor authentication",
+      "disable2faImpact": "{name} ({email}) will be able to sign in with the password alone. Use this when they lost their authenticator and recovery codes.",
+      "updated": "User updated.",
+      "emptyTitle": "No users yet",
+      "emptyBody": "Users sign in to Rowbird with an email and password. Admins add them here and choose their role."
+    },
+    "apiKeys": {
+      "title": "API keys",
+      "help": "Keys let scripts and CI pipelines use the Rowbird API. Each key acts with the scopes you give it.",
+      "create": "Create API key",
+      "createHelp": "Give the key a name that says where it is used, and only the scopes it needs.",
+      "createdTitle": "API key created",
+      "createdHelp": "Send it in the Authorization header as a Bearer token.",
+      "key": "API key",
+      "scopes": "Scopes",
+      "lastUsed": "Last used",
+      "expires": "Expires",
+      "expiresOn": "Expires on",
+      "expiresHint": "Optional. The key stops working at the end of this day.",
+      "noExpiry": "Never",
+      "inactive": "Inactive",
+      "revoke": "Revoke",
+      "revoked": "API key revoked.",
+      "revokeImpact": "Anything using the key {name} will stop working immediately. This cannot be undone.",
+      "emptyTitle": "No API keys",
+      "emptyBody": "Create a key to call the Rowbird API from scripts, CI pipelines or other tools, for example to trigger a report after a data load."
+    },
+    "security": {
+      "title": "Security",
+      "require2faTitle": "Two-factor authentication",
+      "require2faHelp": "When required, users without two-factor authentication must set it up at their next request before doing anything else.",
+      "require2fa": "Require two-factor authentication for everyone",
+      "require2faImpact": "Every user without two-factor authentication, including admins, will have to set it up before continuing.",
+      "require2faConfirm": "Require it",
+      "eventsTitle": "Security events",
+      "eventsHelp": "Sign-ins, account changes and other security-relevant actions, newest first.",
+      "filter": "Filter by event",
+      "allEvents": "All events",
+      "when": "When",
+      "event": "Event",
+      "ip": "IP address",
+      "details": "Details",
+      "emptyTitle": "No events",
+      "emptyBody": "Security events appear here as people sign in and change accounts, keys and settings.",
+      "oidc": {
+        "title": "Single sign-on (OIDC)",
+        "help": "Let people sign in with your identity provider (Google Workspace, Microsoft Entra ID, Okta, Keycloak and others). The provider handles their password and second factor.",
+        "needsBaseURL": "Single sign-on needs the public URL of this server (ROWBIRD_BASE_URL) for the address the provider sends people back to.",
+        "enabled": "Offer single sign-on on the login page",
+        "redirectURI": "Redirect URI",
+        "redirectHint": "Register this address at the provider as the redirect (callback) URI.",
+        "issuer": "Issuer URL",
+        "issuerHint": "The provider's address; its settings are read from /.well-known/openid-configuration.",
+        "test": "Test",
+        "testOk": "The provider answered.",
+        "clientId": "Client ID",
+        "clientSecret": "Client secret",
+        "clientSecretHint": "Leave empty for a public client, which relies on PKCE alone.",
+        "secretSaved": "A secret is saved.",
+        "replace": "Replace",
+        "scopes": "Scopes",
+        "scopesHint": "Separated by spaces. openid is always included.",
+        "buttonLabel": "Button text",
+        "buttonLabelHint": "For example \"Sign in with Acme\". Empty shows \"Sign in with single sign-on\".",
+        "domains": "Allowed email domains",
+        "domainsHint": "Separated by commas. When set, only verified emails in these domains can sign in with the provider.",
+        "autoProvision": "Create an account on the first sign-in",
+        "defaultRole": "Role of new accounts",
+        "linking": "Someone who already has an account signs into it when the provider has verified the same email; the two are linked from then on."
+      }
+    },
+    "alerts": {
+      "title": "Alerts",
+      "help": "When a channel or a report starts failing, Rowbird sends an alert through the primary channel, or through the fallback when the primary fails, and a message when it recovers. The notification bell shows the same alerts.",
+      "none": "None",
+      "primary": "Primary channel",
+      "primaryHint": "Receives every alert.",
+      "fallback": "Fallback channel",
+      "fallbackHint": "Used when the primary fails, or when the alert is about the primary itself.",
+      "noChannels": "No channel can carry alerts yet.",
+      "sameDestination": "Primary and fallback are the same kind of channel. An outage of that service would stop both; prefer different kinds."
+    },
+    "heartbeat": {
+      "title": "Heartbeat",
+      "help": "Rowbird calls this address regularly while it is healthy, so that an external monitor (Uptime Kuma, Healthchecks.io) warns you when it stops.",
+      "url": "Heartbeat URL",
+      "urlHint": "Called with GET. It is stored encrypted and not shown again.",
+      "configured": "A URL is saved.",
+      "replace": "Replace",
+      "remove": "Remove",
+      "interval": "Interval (seconds)",
+      "intervalHint": "Between 30 and 86400. Default 60."
+    },
+    "ai": {
+      "title": "AI",
+      "help": "The assistant writes queries and schedules from a description. It is off until you choose a provider.",
+      "privacy": "Only the request, the connection's dialect and its schema (without the tables excluded from AI) are sent to the provider. Rows never leave your databases, and proposals are never run until someone applies them.",
+      "provider": "Provider",
+      "off": "Off (no AI)",
+      "test": "Test",
+      "testing": "Testing...",
+      "testOk": "The provider accepted the key and the model.",
+      "testFailed": "The test failed",
+      "saved": "AI settings saved",
+      "turnedOff": "The AI assistant is off"
+    },
+    "storage": {
+      "title": "Storage and retention",
+      "retentionTitle": "Retention",
+      "retentionHelp": "A daily job deletes what is older than these limits, on every instance at most once a day.",
+      "runsDays": "Keep runs for (days)",
+      "runsDaysHint": "Older runs are deleted with their delivery attempts, shared links and files.",
+      "artifactsDays": "Keep run files for (days)",
+      "artifactsDaysHint": "Older files are deleted; the run stays, and its links answer that the file is gone.",
+      "fixed": "Security events are kept for 365 days, and notifications for 90 days after they are resolved.",
+      "usageTitle": "Artifact storage",
+      "backend": "Where files are kept",
+      "backends": {
+        "local": "Local disk (data directory)",
+        "s3": "S3 bucket"
+      },
+      "used": "Space used",
+      "lastCleanup": "Last cleanup",
+      "never": "Never",
+      "backupTitle": "Scheduled backups",
+      "backupHelp": "Backups are configured on the server with the ROWBIRD_BACKUP_* variables. You can also run rowbird backup at any time.",
+      "backupPostgres": "The internal store is Postgres: back it up with pg_dump. Scheduled backups only cover SQLite.",
+      "backupOff": "Scheduled backups are off. Set ROWBIRD_BACKUP_SCHEDULE (a cron expression in UTC) to turn them on.",
+      "backupFailed": "The latest scheduled backup failed: {error}",
+      "schedule": "Schedule",
+      "destination": "Destination",
+      "destinations": {
+        "local": "Backup directory, keeping the latest {keep}",
+        "s3": "Backup directory and S3 bucket, keeping the latest {keep}"
+      },
+      "lastBackup": "Last backup",
+      "nextBackup": "Next backup",
+      "masterKeyReminder": "Backups do not include the master key. Keep a copy of it somewhere safe: without it, the saved credentials in a backup cannot be read."
+    },
+    "about": {
+      "title": "About",
+      "version": "Version",
+      "commit": "Commit",
+      "built": "Built",
+      "platform": "Platform",
+      "updatesTitle": "Updates",
+      "updatesHelp": "Once a day Rowbird can ask GitHub for the latest release. The request carries only the running version; nothing about your data or your users is sent.",
+      "checkForUpdates": "Check for new releases",
+      "disabledByServer": "The update check is turned off on the server (ROWBIRD_UPDATE_CHECK=false).",
+      "available": "Version {version} is available",
+      "releaseNotes": "Release notes",
+      "upToDate": "You are on the latest release (checked {when})."
+    }
+  },
+  "events": {
+    "login_success": "Signed in",
+    "login_failed": "Failed sign-in",
+    "login_locked": "Account locked",
+    "logout": "Signed out",
+    "password_changed": "Password changed",
+    "password_reset": "Password reset",
+    "2fa_enabled": "2FA turned on",
+    "2fa_disabled": "2FA turned off",
+    "recovery_codes_regenerated": "New recovery codes",
+    "recovery_code_used": "Recovery code used",
+    "session_revoked": "Session signed out",
+    "user_created": "User created",
+    "user_updated": "User updated",
+    "user_role_changed": "Role changed",
+    "user_disabled": "User disabled",
+    "user_enabled": "User enabled",
+    "api_key_created": "API key created",
+    "api_key_revoked": "API key revoked",
+    "settings_changed": "Settings changed",
+    "setup_completed": "Setup completed",
+    "connection_created": "Connection created",
+    "connection_updated": "Connection changed",
+    "keys_rotated": "Master key rotated",
+    "connection_deleted": "Connection deleted",
+    "passkey_added": "Passkey added",
+    "passkey_removed": "Passkey removed",
+    "oidc_linked": "Account linked to single sign-on",
+    "user_provisioned": "User created by single sign-on",
+    "password_reset_requested": "Password reset requested"
+  },
+  "errors": {
+    "ai": {
+      "not_configured": "The AI assistant is not set up. An admin can choose a provider in Settings > AI.",
+      "no_schema": "The connection's schema has not been read yet. Refresh it on the connection page first.",
+      "too_many_requests": "Too many assistant requests. Wait a few minutes and try again.",
+      "auth_failed": "The AI provider refused the API key. Check it in Settings > AI.",
+      "rejected": "The AI provider refused the request.",
+      "unreachable": "The AI provider could not be reached.",
+      "rate_limited": "The AI provider is limiting requests. Try again later.",
+      "timeout": "The AI provider took too long to answer.",
+      "network_blocked": "The AI provider's address is blocked by the network policy.",
+      "failed": "The AI provider failed to answer.",
+      "invalid_output": "The AI answer could not be used. Try rephrasing the request."
+    },
+    "auth": {
+      "unauthenticated": "Your session ended. Sign in again.",
+      "forbidden": "You do not have permission to do this.",
+      "csrf_failed": "The request could not be verified. Reload the page and try again.",
+      "rate_limited": "Too many attempts. Try again in {seconds} seconds.",
+      "invalid_credentials": "Incorrect email or password.",
+      "mfa_invalid": "Incorrect verification code.",
+      "challenge_expired": "The sign-in attempt expired. Enter your email and password again.",
+      "locked": "Too many failed attempts. Try again in {seconds} seconds.",
+      "password_change_required": "Change your password before continuing.",
+      "mfa_setup_required": "Set up two-factor authentication before continuing.",
+      "oidc_unavailable": "Single sign-on is not set up on this server.",
+      "oidc_failed": "Single sign-on did not complete. Try again.",
+      "oidc_no_account": "There is no Rowbird account for this identity. Ask an admin to add you.",
+      "oidc_domain_not_allowed": "Your email domain is not allowed to sign in here.",
+      "oidc_email_unverified": "Your identity provider has not verified your email, so it cannot be used here.",
+      "oidc_discovery_failed": "The identity provider could not be reached at this address.",
+      "reset_invalid": "This link is invalid, was already used or has expired. Ask for a new one."
+    },
+    "channel": {
+      "name_taken": "A channel with this name already exists",
+      "in_use": "The channel is used by reports and cannot be deleted"
+    },
+    "condition": {
+      "column_not_found": "The condition refers to a column the query does not return.",
+      "invalid_value": "The condition's value does not fit the column's type."
+    },
+    "conflict": {
+      "version": "Someone else changed this in the meantime. Reload and try again.",
+      "duplicate": "This value is already in use."
+    },
+    "connection": {
+      "name_taken": "A connection with this name already exists.",
+      "in_use": "The connection is used by queries and cannot be deleted.",
+      "auth_failed": "The database rejected the user or password.",
+      "host_unreachable": "The database server could not be reached. Check the host, the port and the firewall.",
+      "tls_required": "The database server requires an encrypted (TLS) connection. Change the TLS mode.",
+      "tls_failed": "The encrypted (TLS) connection could not be established. Check the TLS mode and certificates.",
+      "database_not_found": "The database was not found, or the user cannot access it.",
+      "timeout": "The database server did not answer in time.",
+      "network_blocked": "The network policy of this Rowbird does not allow this address.",
+      "path_not_allowed": "The file is outside the directories allowed for SQLite (ROWBIRD_SQLITE_DIRS).",
+      "ssh_auth_failed": "The SSH host rejected the user, password or key.",
+      "ssh_host_key_unknown": "The SSH host key must be confirmed.",
+      "ssh_host_key_mismatch": "The SSH host key changed since it was confirmed. If the change is expected, update the fingerprint.",
+      "ssh_unreachable": "The SSH host could not be reached.",
+      "failed": "The connection failed."
+    },
+    "delivery": {
+      "no_system_mailer": "No email channel is marked for system mail. Mark one in Channels to send tests by email.",
+      "not_failed": "Only a failed delivery can be sent again.",
+      "not_resendable": "This delivery cannot be sent again: it was a test to you, or its delivery was deleted.",
+      "failed": "The delivery failed.",
+      "auth_failed": "The destination refused the credentials. Check the channel settings.",
+      "rejected": "The destination rejected the message.",
+      "unreachable": "The destination could not be reached.",
+      "too_large": "The message was too large for the destination.",
+      "rate_limited": "The destination is limiting requests. Try again later.",
+      "timeout": "The destination took too long to answer.",
+      "network_blocked": "The address is blocked by the network policy (private addresses are not allowed).",
+      "base_url_missing": "Links need ROWBIRD_BASE_URL, which is not set.",
+      "channel_unavailable": "The channel no longer exists or cannot be used.",
+      "result_unavailable": "The result is no longer available to build the files."
+    },
+    "gitops": {
+      "not_managed": "This is not managed by the configuration directory.",
+      "not_detached": "This was not detached from the configuration directory."
+    },
+    "internal": "Something went wrong. Try again in a moment.",
+    "link": {
+      "not_found": "This link does not exist. Check that it was copied completely.",
+      "expired": "This link has expired or was revoked. Ask whoever shared it for a new one.",
+      "login_required": "Sign in to open this link.",
+      "revoked": "The link was already revoked"
+    },
+    "query": {
+      "slug_taken": "A query with this slug already exists.",
+      "in_use": "The query is used by reports and cannot be deleted.",
+      "timeout": "The query took longer than the time limit.",
+      "cancelled": "The query was cancelled.",
+      "multiple_statements": "Only one statement is allowed. The connection does not allow several.",
+      "read_only": "The query tried to change data. Rowbird only reads.",
+      "failed": "The database could not run the query. Check the SQL."
+    },
+    "report": {
+      "slug_taken": "A report with this slug already exists.",
+      "run_active": "The report has a run in progress. Wait for it or cancel it first."
+    },
+    "request": {
+      "invalid": "The request is invalid.",
+      "unsupported_media_type": "The request format is not supported.",
+      "method_not_allowed": "This action is not allowed here."
+    },
+    "resource": {
+      "not_found": "It was not found. It may have been removed.",
+      "managed_by_gitops": "This is managed by the configuration directory. An admin can detach it to change it here."
+    },
+    "route": {
+      "not_found": "There is no such API endpoint."
+    },
+    "run": {
+      "not_active": "The run has already finished.",
+      "cancelled": "Cancelled by a user.",
+      "shutdown": "Cancelled because the server stopped.",
+      "instance_lost": "The server running it stopped unexpectedly.",
+      "overlap": "Skipped: the previous run was still in progress.",
+      "condition_false": "Skipped: the condition did not hold.",
+      "invalid_params": "The query's parameters are missing or invalid.",
+      "query_missing": "The report's query no longer exists.",
+      "internal": "An unexpected error happened while running the report.",
+      "result_unavailable": "The result of this run is no longer available.",
+      "delivery_failed": "The query ran, but some deliveries failed. You can send them again."
+    },
+    "setup": {
+      "completed": "Rowbird is already set up. Sign in instead.",
+      "invalid_token": "The setup token is incorrect."
+    },
+    "totp": {
+      "already_enabled": "Two-factor authentication is already on.",
+      "not_enabled": "Two-factor authentication is not on.",
+      "not_started": "Start the two-factor setup again."
+    },
+    "user": {
+      "last_admin": "The workspace needs at least one active admin.",
+      "self_modification": "You cannot change your own role or disable your own account.",
+      "email_taken": "A user with this email already exists."
+    },
+    "validation": {
+      "failed": "Check the highlighted fields.",
+      "required": "Required.",
+      "email": "Enter valid email addresses, separated by commas.",
+      "too_short": "Too short. Use at least 10 characters.",
+      "too_long": "Too long.",
+      "password_common": "This password is too common or too easy to guess.",
+      "password_incorrect": "The password is incorrect.",
+      "invalid_value": "Choose a valid value.",
+      "code_invalid": "The code is not valid. Check the time on your phone and try the current code.",
+      "slug": "Use lowercase letters, numbers, dashes and underscores, starting with a letter or number.",
+      "immutable": "This cannot be changed.",
+      "range": "Out of the allowed range.",
+      "invalid_type": "Wrong type of value.",
+      "unknown_field": "Unknown field.",
+      "param_undefined": "This parameter is used in the SQL but not defined.",
+      "param_name": "Use letters, numbers and underscores, starting with a letter.",
+      "duplicate": "This name is repeated.",
+      "param_reserved": "This name is reserved for a built-in parameter.",
+      "cron": "Enter a valid cron expression with five fields, at most once a minute.",
+      "cron_never": "This schedule never runs; check the day and month.",
+      "timezone": "Choose a valid time zone.",
+      "too_many": "Too many items.",
+      "base_url_missing": "Set ROWBIRD_BASE_URL to share files as links.",
+      "template": "The template has a syntax error.",
+      "template_variable": "The template uses a variable that does not exist.",
+      "url": "Enter an http or https address.",
+      "no_delivery": "This report has no delivery on that channel.",
+      "alerts_unsupported": "This channel cannot carry alerts.",
+      "same_channel": "Choose a different channel from the primary.",
+      "not_found": "Does not exist."
+    },
+    "passkey": {
+      "unavailable": "Passkeys need the public URL of this server (ROWBIRD_BASE_URL).",
+      "failed": "The passkey could not be verified. Try again, or use another passkey.",
+      "exists": "This passkey is already registered."
+    }
+  },
+  "schemaForm": {
+    "configured": "Configured",
+    "replace": "Replace",
+    "remove": "Remove",
+    "variables": "Insert:",
+    "insertVariable": "Insert {name}"
+  },
+  "connections": {
+    "help": "Databases Rowbird reads from. Rowbird never writes to them.",
+    "add": "Add connection",
+    "askAdmin": "Ask an admin to add a connection.",
+    "emptyTitle": "No connections yet",
+    "emptyBody": "A connection tells Rowbird how to reach one of your databases: PostgreSQL, MySQL, MariaDB, SQL Server or SQLite. Queries and reports run on connections.",
+    "driver": "Database",
+    "status": "Status",
+    "lastChecked": "Last checked",
+    "canWrite": "Can write",
+    "statuses": {
+      "unknown": "Not checked",
+      "ok": "OK",
+      "error": "Failing"
+    },
+    "chooseDriver": "Choose the database",
+    "chooseDriverHelp": "You can add more connections later.",
+    "changeDriver": "Choose another database",
+    "name": "Name",
+    "nameHint": "Lowercase letters, numbers, dashes and underscores. Used to refer to this connection in YAML files.",
+    "editTitle": "Edit {name}",
+    "edit": "Edit",
+    "delete": "Delete connection",
+    "deleteImpact": "The connection {name} and its stored credentials will be deleted. This cannot be undone.",
+    "deleted": "Connection deleted.",
+    "saved": "Connection saved.",
+    "savedWithError": "Connection saved, but the check failed: {error}",
+    "lastCheckFailed": "The last check failed",
+    "limits": {
+      "title": "Limits",
+      "help": "Protect the database from long or large queries.",
+      "timeout": "Query timeout (seconds)",
+      "maxRows": "Maximum rows per query",
+      "multi": "Allow several statements in one query",
+      "multiWarning": "Several statements in one query make it possible to change data if the database user can write. Use a read-only user."
+    },
+    "test": {
+      "button": "Test connection",
+      "running": "Testing...",
+      "ok": "Connection works",
+      "okDetail": "{version}, answered in {ms} ms, {tables} tables and views found.",
+      "failed": "Connection failed"
+    },
+    "writeWarning": {
+      "title": "This user can change data",
+      "body": "Rowbird only reads, but a user with write permission is riskier. Create a database user with read-only permissions and use it here."
+    },
+    "fingerprint": {
+      "title": "Confirm the SSH host key",
+      "body": "This is the first connection to this SSH host. Compare the fingerprint below with the one shown by ssh-keygen -lf on the host before trusting it.",
+      "trust": "Trust this key and test again"
+    },
+    "schema": {
+      "title": "Schema",
+      "cachedAt": "Read {when}.",
+      "never": "Not read yet.",
+      "aiHelp": "Tables excluded from the AI assistant are never sent to it.",
+      "refresh": "Read again",
+      "refreshed": "Schema updated.",
+      "search": "Search tables and columns",
+      "emptyTitle": "No tables",
+      "emptyBody": "Test the connection or read the schema again. Only tables the user can read are listed.",
+      "view": "view",
+      "columns": "{n} columns",
+      "excludeFromAI": "Exclude from AI",
+      "excluded": "Excluded from AI"
+    },
+    "types": {
+      "text": "text",
+      "integer": "integer",
+      "decimal": "decimal",
+      "float": "float",
+      "boolean": "boolean",
+      "date": "date",
+      "datetime": "date and time",
+      "time": "time",
+      "json": "JSON",
+      "binary": "binary",
+      "unknown": "other"
+    }
+  },
+  "params": {
+    "title": "Parameters",
+    "none": "No parameters. Write a name between double braces in the SQL, such as today, to add one.",
+    "builtins": "Built-in:",
+    "name": "Name",
+    "type": "Type",
+    "default": "Default",
+    "previewValue": "Value for the preview",
+    "unused": "Not used in the SQL",
+    "remove": "Remove parameter {name}",
+    "types": {
+      "text": "Text",
+      "integer": "Integer",
+      "decimal": "Decimal",
+      "boolean": "Yes or no",
+      "date": "Date",
+      "datetime": "Date and time"
+    },
+    "builtin": {
+      "now": "Current date and time",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "start_of_week": "Monday of this week",
+      "start_of_month": "First day of this month",
+      "start_of_last_month": "First day of last month",
+      "end_of_last_month": "Last day of last month",
+      "start_of_year": "January 1st of this year"
+    }
+  },
+  "results": {
+    "title": "Results",
+    "hint": "Run the query (Ctrl or Cmd + Enter) to see a preview of up to 100 rows.",
+    "viewerHint": "Only editors can run queries.",
+    "summary": "{rows} rows in {ms} ms",
+    "truncated": "Showing the first {rows} rows; there are more.",
+    "params": "Parameters ({tz}):",
+    "empty": "No rows.",
+    "true": "yes",
+    "false": "no",
+    "bytes": "{n} bytes"
+  },
+  "queries": {
+    "help": "SQL saved with its history. Reports run queries on a schedule.",
+    "add": "New query",
+    "emptyTitle": "No queries yet",
+    "emptyBody": "A query is SQL that runs on a connection, with parameters such as today or yesterday. Every save keeps a version you can compare and restore.",
+    "lastChange": "Last change",
+    "reports": "Reports",
+    "byAuthor": "by {author}, version {n}",
+    "usedBy": "used by one report | used by {n} reports",
+    "editor": {
+      "title": "Title",
+      "titlePlaceholder": "For example, Sales by region",
+      "meta": "Version {n} by {author}",
+      "connection": "Connection",
+      "slug": "Slug",
+      "slugHint": "Used to refer to this query in YAML files.",
+      "description": "Description",
+      "sql": "SQL",
+      "sqlPlaceholder": "SELECT ...",
+      "run": "Run",
+      "running": "Running...",
+      "runShortcut": "Ctrl or Cmd + Enter",
+      "needConnection": "Add a connection first, so queries have a database to run on.",
+      "noSchema": "No tables yet. Test the connection to read its schema.",
+      "toggleColumns": "Show or hide the columns of {table}",
+      "undefinedParams": "Define these parameters: {names}",
+      "saveTitle": "Save query",
+      "saveHelp": "Changing the SQL or the parameters creates a new version.",
+      "saveFirstHelp": "The first version of the query is saved.",
+      "saveImpact": "This query is used by one report; it will run the new version. | This query is used by {n} reports; they will run the new version.",
+      "note": "Note",
+      "noteHint": "Optional. What changed, shown in the history.",
+      "saved": "Query saved.",
+      "savedVersion": "Saved as version {n}.",
+      "created": "Query created.",
+      "delete": "Delete query",
+      "deleteImpact": "The query {title} and its {n} versions will be deleted. This cannot be undone.",
+      "deleted": "Query deleted."
+    },
+    "versions": {
+      "title": "Versions",
+      "help": "Every change to the SQL or parameters is kept. Pick a version to compare it with the current one.",
+      "label": "Version {n}",
+      "current": "current",
+      "restoredFrom": "Restored from version {n}",
+      "pick": "Pick an older version to compare.",
+      "comparing": "Changes from version {n} to the current version {current}.",
+      "restore": "Restore version {n}",
+      "restoreImpact": "A new version is created with the SQL and parameters of version {n}. The history is kept.",
+      "restored": "Version {n} restored as version {current}."
+    }
+  },
+  "reports": {
+    "help": "Queries that run on a schedule and deliver their results when the condition holds.",
+    "add": "New report",
+    "emptyTitle": "No reports yet",
+    "emptyBody": "A report runs a saved query on a schedule, checks a condition and delivers the result. Create one to have your SQL results arrive on their own.",
+    "resumed": "Report resumed.",
+    "paused": "Report paused.",
+    "status": {
+      "active": "Active",
+      "paused": "Paused",
+      "failing": "Failing"
+    },
+    "fields": {
+      "title": "Title",
+      "query": "Query",
+      "maxRows": "Row limit",
+      "autoPauseAfter": "Pause after consecutive failures",
+      "retryMax": "Retries after a failure",
+      "retryBackoff": "Wait before the first retry (seconds)",
+      "misfire": "When a run was missed",
+      "overlap": "When the previous run is still going",
+      "notifyOwner": "Notify the owner when a run fails"
+    },
+    "list": {
+      "status": "Status",
+      "nextRun": "Next run",
+      "lastRun": "Last run",
+      "enabled": "Enabled",
+      "none": "Not scheduled",
+      "never": "Never ran",
+      "toggle": "Enable or pause {title}"
+    },
+    "misfire": {
+      "run_once": "Run once to catch up",
+      "skip": "Skip it"
+    },
+    "overlap": {
+      "skip": "Skip the new run",
+      "queue": "Wait and run it after"
+    },
+    "sections": {
+      "query": "Query",
+      "schedule": "Schedule",
+      "conditions": "Conditions",
+      "advanced": "Advanced"
+    },
+    "editor": {
+      "editTitle": "Edit report",
+      "saved": "Report saved.",
+      "created": "Report created.",
+      "needQuery": "Save a query first; a report runs a saved query.",
+      "titlePlaceholder": "For example, Daily sales",
+      "slugHint": "Used to refer to this report in YAML files.",
+      "overridesHelp": "Values for the query's parameters when this report runs. Leave a field empty to use the default.",
+      "defaultIs": "Default: {value}",
+      "noDefault": "No default; a value is required.",
+      "enabled": "Start scheduling right away",
+      "maxRowsHint": "Leave empty to use the connection's limit.",
+      "autoPauseHint": "0 never pauses the report.",
+      "retryBackoffHint": "Each further retry waits twice as long.",
+      "misfireHint": "For example, when the server was down at the scheduled time. Missed runs are never all queued.",
+      "overlapHint": "Only for scheduled runs; manual runs always start."
+    },
+    "detail": {
+      "queued": "Run queued.",
+      "deleted": "Report deleted.",
+      "runNow": "Run now",
+      "runDeliver": "Run and deliver",
+      "runDeliverHint": "A full run: it counts toward failures and the result-changed condition.",
+      "pause": "Pause",
+      "resume": "Resume",
+      "edit": "Edit",
+      "autoPaused": "Paused after {n} consecutive failed runs. Fix the cause and resume the report.",
+      "runs": "Recent runs",
+      "allRuns": "See all runs of this report",
+      "delete": "Delete report",
+      "deleteImpact": "{title} and its run history will be deleted. Its query is kept."
+    },
+    "chart": {
+      "rows": "no rows | one row | {n} rows",
+      "ms": "{n} ms",
+      "seconds": "{n} s",
+      "successRate": "Success rate",
+      "median": "Median duration",
+      "lastFailure": "Last failure",
+      "none": "None",
+      "noData": "No runs yet",
+      "alt": "The latest {n} runs: {rate}% succeeded, median duration {median}."
+    }
+  },
+  "schedule": {
+    "kind": "Frequency",
+    "kinds": {
+      "daily": "Every day",
+      "weekdays": "Weekdays (Monday to Friday)",
+      "weekly": "Weekly on",
+      "monthly": "Monthly on day",
+      "hourly": "Every hour",
+      "minutes": "Every few minutes",
+      "custom": "Custom cron expression"
+    },
+    "everyMinutes": "Every minute | Every {n} minutes",
+    "timezone": "Time zone",
+    "time": "At",
+    "dayOfMonth": "Day",
+    "dayOfMonthHint": "Months without this day are skipped.",
+    "minute": "Minute past the hour",
+    "every": "Interval",
+    "days": "Days",
+    "cron": "Cron expression",
+    "cronHint": "Five fields: minute, hour, day of the month, month and day of the week.",
+    "nextRuns": "Next runs ({tz}):",
+    "yourTime": "{time} your time"
+  },
+  "conditions": {
+    "help": "Deliver only when the result matches. Without rules, every run delivers.",
+    "always": "Always deliver.",
+    "deliverWhen": "Deliver when",
+    "matchAll": "all rules hold",
+    "matchAny": "any rule holds",
+    "add": "Add rule",
+    "remove": "Remove rule",
+    "summaryAll": "All of: {rules}",
+    "summaryAny": "Any of: {rules}",
+    "addType": "Kind of rule to add"
+  },
+  "runs": {
+    "help": "Every execution of every report, newest first.",
+    "emptyTitle": "No runs yet",
+    "emptyBody": "Runs appear here when a report runs on its schedule or when someone runs it by hand.",
+    "status": {
+      "pending": "Queued",
+      "running": "Running",
+      "success": "Succeeded",
+      "partial": "Partly delivered",
+      "skipped": "Skipped",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "trigger": {
+      "schedule": "Scheduled",
+      "manual": "Manual",
+      "test": "Test",
+      "retry": "Retry"
+    },
+    "noDelivery": "result only",
+    "ms": "{n} ms",
+    "seconds": "{n} s",
+    "fields": {
+      "status": "Status",
+      "report": "Report",
+      "trigger": "Trigger",
+      "started": "Started",
+      "duration": "Duration",
+      "rows": "Rows"
+    },
+    "filters": {
+      "anyStatus": "Any status",
+      "anyTrigger": "Any trigger",
+      "anyReport": "Any report",
+      "periodLabel": "Period",
+      "period": {
+        "all": "Any time",
+        "24h": "Last 24 hours",
+        "7d": "Last 7 days",
+        "30d": "Last 30 days"
+      },
+      "emptyTitle": "No runs match these filters",
+      "emptyBody": "Try another status, report, trigger or period, or clear the filters to see every run.",
+      "clear": "Clear filters"
+    },
+    "steps": {
+      "query": "Query",
+      "condition": "Condition",
+      "formats": "Formats",
+      "deliveries": "Deliveries"
+    },
+    "detail": {
+      "attempt": "attempt {n}",
+      "cancel": "Cancel run",
+      "cancelling": "Cancelling...",
+      "cancelRequested": "Cancel requested.",
+      "retrying": "Another attempt is queued.",
+      "rows": "{n} row | {n} rows",
+      "truncated": "cut at the row limit",
+      "version": "Query version {n}",
+      "sql": "SQL that ran",
+      "conditionPassed": "Holds; the result goes on to delivery.",
+      "conditionFailed": "Does not hold; nothing is delivered.",
+      "firstResult": "first result",
+      "noRows": "no rows",
+      "actual": "value: {value}",
+      "rowCount": "{n} rows",
+      "noFormats": "No formats configured yet.",
+      "noDeliveries": "No deliveries configured yet.",
+      "notDelivered": "Not delivered: this run only shows the result.",
+      "sample": "Result",
+      "sampleOf": "The first {shown} of {total} rows.",
+      "sampleAll": "All rows of the result.",
+      "download": "Download the result",
+      "downloadUntil": "Available until {time}. The file uses your language and the report's time zone.",
+      "downloadExpired": "The result of this run can no longer be downloaded.",
+      "tries": "{n} tries",
+      "resend": "Resend",
+      "resent": "Sent again to {channel}",
+      "resendFailed": "Sending to {channel} failed again",
+      "deletedChannel": "Deleted channel",
+      "fallbackToLink": "Files too large to attach were sent as links.",
+      "filesUntil": "The delivered files can be downloaded until {time}.",
+      "bytes": "{n} bytes",
+      "kb": "{n} KB",
+      "mb": "{n} MB"
+    },
+    "attemptStatus": {
+      "pending": "Waiting",
+      "sending": "Sending",
+      "sent": "Sent",
+      "failed": "Failed",
+      "skipped": "Skipped"
+    }
+  },
+  "channels": {
+    "help": "Where reports are delivered: email, chat, webhooks, storage and monitors.",
+    "add": "Add channel",
+    "edit": "Edit",
+    "delete": "Delete channel",
+    "deleted": "Channel deleted",
+    "saved": "Channel saved",
+    "editTitle": "Edit {name}",
+    "emptyTitle": "No channels yet",
+    "emptyBody": "A channel is a destination with its credentials, such as an SMTP server or a Slack workspace. Reports deliver to channels.",
+    "askAdmin": "Ask an admin to add a channel.",
+    "type": "Type",
+    "health": "Health",
+    "usedBy": "Used by",
+    "lastActivity": "Last activity",
+    "reportCount": "No reports | 1 report | {n} reports",
+    "neverUsed": "Never",
+    "noFailures": "None",
+    "unused": "No report delivers to this channel yet.",
+    "lastSuccess": "Last success",
+    "lastFailure": "Last failure",
+    "modes": "Delivery modes",
+    "attachmentLimit": "files up to {mb} MB",
+    "systemMailer": "System mail",
+    "systemMailerHelp": "Sends password resets and \"send test to me\". Only one email channel can do this.",
+    "name": "Name",
+    "nameHint": "Lowercase letters, digits and hyphens. Used to reference the channel in YAML.",
+    "chooseType": "Choose a destination",
+    "chooseTypeHelp": "You can test the settings before saving.",
+    "changeType": "Choose another destination",
+    "statuses": {
+      "unknown": "Not used yet",
+      "ok": "Healthy",
+      "failing": "Failing"
+    },
+    "failingTitle": "The last delivery failed ({when})",
+    "retryFailed": "Resend failed deliveries of the last 24 hours",
+    "retryQueued": "No deliveries queued | 1 delivery is being sent again | {n} deliveries are being sent again",
+    "retryNothing": "There are no failed deliveries to send again.",
+    "deleteImpact": "Delete the channel {name}? Its settings and credentials are removed.",
+    "deleteInUse": "This channel is used by 1 report. Remove its delivery first. | This channel is used by {n} reports. Remove their deliveries first.",
+    "test": {
+      "button": "Send a test",
+      "running": "Sending...",
+      "ok": "Test sent",
+      "okDetail": "The destination accepted the test message.",
+      "failed": "The test failed",
+      "to": "Send the test email to",
+      "toHint": "Your address by default."
+    },
+    "systemAlert": "System alert",
+    "usedByAlert": {
+      "primary": "System alerts (primary)",
+      "fallback": "System alerts (fallback)"
+    },
+    "tlsHint465": "Port 465 usually expects TLS from the start: choose \"tls\", or use port 587 with STARTTLS. Otherwise the test waits for the timeout.",
+    "tlsHint587": "Port 587 usually expects STARTTLS: choose \"starttls\", or use port 465 with TLS. Otherwise the test waits for the timeout."
+  },
+  "deliveries": {
+    "title": "Deliveries",
+    "help": "Where each run goes, and in which form.",
+    "add": "Add delivery",
+    "edit": "Edit delivery",
+    "editTitle": "Edit delivery",
+    "delete": "Delete delivery",
+    "deleted": "Delivery deleted",
+    "saved": "Delivery saved",
+    "deleteImpact": "Stop delivering this report to {channel}?",
+    "editorHelp": "Choose the channel, what to send and how. The preview uses the latest result of the report.",
+    "emptyTitle": "This report delivers nowhere yet",
+    "emptyBody": "Add a delivery to send each run to a channel: the rows in the message, files attached, or links to download them.",
+    "needChannel": "Add a channel first.",
+    "channel": "Channel",
+    "mode": "Send as",
+    "formats": "Files",
+    "modes": {
+      "inline": "Rows in the message",
+      "attachment": "Attached files",
+      "link": "Download links"
+    },
+    "modeHelp": {
+      "inline": "The first rows appear in the message itself.",
+      "attachment": "Files are attached; files too large for the destination are sent as links.",
+      "link": "The message carries links that download the files until they expire."
+    },
+    "linksDisabled": "Links need ROWBIRD_BASE_URL, the public address of this server. Set it to send links; large attachments also need it.",
+    "linksDisabledShort": "needs ROWBIRD_BASE_URL",
+    "inlineRows": "Rows shown in the message",
+    "inlineRowsHint": "Between 1 and 200.",
+    "inlineWithFiles": "Also show the first rows in the message",
+    "linkExpiry": "Links expire after",
+    "linkFallbackHint": "Used when a file is too large to attach.",
+    "days": "{n} day | {n} day | {n} days",
+    "requireLogin": "Require signing in to download",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "testMe": "Send test to me",
+    "testChannel": "Send a test to this channel",
+    "testQueued": "Running the report; the result goes to {email}.",
+    "testQueuedChannel": "Running the report; the result goes to this channel only.",
+    "preview": {
+      "heading": "Preview",
+      "help": "With the latest result of the report. Nothing is sent.",
+      "subject": "Subject",
+      "title": "Message preview"
+    }
+  },
+  "links": {
+    "help": "Download links sent by deliveries. Revoke one to stop it at once.",
+    "emptyTitle": "No shared links",
+    "emptyBody": "Links appear here when a delivery sends files as links, or when a file is too large to attach.",
+    "activeOnly": "Active only",
+    "file": "File",
+    "status": "Status",
+    "expires": "Expires",
+    "downloads": "Downloads",
+    "actions": "Actions",
+    "run": "run",
+    "loginRequired": "sign-in required",
+    "revokedBy": "by {name}",
+    "lastDownload": "last {time}",
+    "statuses": {
+      "active": "Active",
+      "expired": "Expired",
+      "revoked": "Revoked"
+    },
+    "revoke": "Revoke link",
+    "revoked": "Link revoked",
+    "revokeImpact": "Anyone with the link to {file} will no longer be able to download it. This cannot be undone.",
+    "detail": {
+      "title": "Shared link",
+      "help": "What was shared, who can open it, and the latest downloads.",
+      "report": "Report",
+      "created": "Created",
+      "access": "Who can open it",
+      "anyone": "Anyone with the link",
+      "revoked": "Revoked",
+      "downloads": "No downloads | One download | {n} downloads",
+      "when": "When",
+      "who": "Who",
+      "ip": "IP address",
+      "browser": "Browser",
+      "anonymous": "Anonymous",
+      "agent": "{browser} on {os}",
+      "unknownAgent": "Unknown",
+      "noDownloadsTitle": "Nobody opened it yet",
+      "noDownloadsBody": "Each download through this link shows up here with its time, the signed-in user when there is one, and where it came from.",
+      "latestOnly": "Only the latest 100 downloads are listed."
+    }
+  },
+  "notifications": {
+    "bell": "Notifications",
+    "bellUnread": "Notifications, {count} unread",
+    "title": "Notifications",
+    "help": "Channels and reports that need attention. Repeated failures are counted on one notification until the problem ends.",
+    "markAllRead": "Mark all as read",
+    "empty": "Nothing needs your attention.",
+    "occurrences": "{count} times",
+    "resolved": "resolved",
+    "unread": "Unread",
+    "types": {
+      "channel_failing": "Channel {channel} is failing",
+      "channel_recovered": "Channel {channel} recovered",
+      "report_failing": "Report {report} failed",
+      "report_recovered": "Report {report} recovered",
+      "report_paused": "Report {report} was paused after {failures} failures in a row",
+      "gitops_failed": "The configuration directory was not applied",
+      "report_orphaned": "Report {report} left the configuration directory and was paused",
+      "backup_failed": "The scheduled backup failed"
+    }
+  },
+  "health": {
+    "channelFailing": "Channel {name} is failing",
+    "channelsFailing": "{count} channels are failing",
+    "reportFailing": "Report {name} is failing",
+    "reportsFailing": "{count} reports are failing"
+  },
+  "home": {
+    "help": "What runs next, what failed recently and how deliveries are doing.",
+    "successRate": {
+      "title": "Success rate",
+      "help": "Scheduled runs and manual runs that deliver. Partial runs count as not successful; skipped runs are left out.",
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "count": "{succeeded} of {total} runs",
+      "none": "No runs yet"
+    },
+    "nextRuns": {
+      "title": "Next runs",
+      "empty": "No report is scheduled. Reports run a query on a schedule and deliver the result."
+    },
+    "failures": {
+      "title": "Recent failures",
+      "empty": "No run failed recently."
+    },
+    "channels": {
+      "title": "Failing channels",
+      "empty": "Every channel is working."
+    },
+    "onboarding": {
+      "title": "Get your first report delivered",
+      "help": "{done} of {total} steps done. Each one takes a minute.",
+      "hide": "Hide",
+      "done": "done",
+      "todo": "to do",
+      "askAdmin": "Ask an admin to add a connection.",
+      "openReports": "Open reports",
+      "steps": {
+        "connection": {
+          "title": "Connect a database",
+          "help": "Rowbird reads from it, never writes."
+        },
+        "query": {
+          "title": "Write a query",
+          "help": "The SQL whose result you want to receive."
+        },
+        "report": {
+          "title": "Schedule a report",
+          "help": "When to run the query and where to send the result."
+        },
+        "delivery": {
+          "title": "Receive the first delivery",
+          "help": "Wait for the schedule, or use \"Run now\" or \"Send test to me\" on the report."
+        }
+      }
+    }
+  },
+  "ai": {
+    "panel": {
+      "title": "Assistant",
+      "shortcut": "Ask the AI assistant (Ctrl/Cmd+I)",
+      "help": "Describe the query you need. The proposal shows as a change to the current SQL; nothing runs until you apply it and run the preview.",
+      "off": "The AI assistant is not set up in this workspace.",
+      "setUp": "Set it up in Settings > AI",
+      "askAdmin": "Ask an admin to choose a provider in Settings > AI.",
+      "prompt": "What should the query return?",
+      "placeholder": "For example: total sales per region this month, largest first",
+      "privacy": "The request and the schema are sent to the AI provider; rows are never sent.",
+      "generate": "Propose",
+      "generating": "Thinking...",
+      "proposal": "Proposal",
+      "name": "Suggested name",
+      "params": "New parameters:",
+      "scheduleNote": "Suggested schedule for a report: {schedule}.",
+      "apply": "Apply",
+      "discard": "Discard",
+      "applyNote": "Applying replaces the SQL in the editor. Review it and run the preview before saving.",
+      "applied": "Proposal applied. Review it and run the preview."
+    },
+    "schedule": {
+      "label": "Describe when to run",
+      "placeholder": "For example: every weekday at 8 in the morning",
+      "suggest": "Suggest"
+    },
+    "warnings": {
+      "not_read_only": "This SQL may change data. Queries run in read-only transactions, but review it carefully.",
+      "multiple_statements": "This SQL has more than one statement; connections run one unless they allow more.",
+      "schedule_invalid": "The suggested schedule was not valid and was left out.",
+      "schema_truncated": "The schema is large, so only part of it was sent. Mention the tables you need by name.",
+      "no_schedule": "The description could not be turned into a schedule."
+    }
+  },
+  "config": {
+    "title": "Import / export",
+    "help": "Reports, queries, connections and channels as YAML: to copy them to another instance, keep them in Git, or share them. Secrets are never exported.",
+    "export": {
+      "button": "Export",
+      "all": "Export everything",
+      "selected": "Export {n} selected",
+      "pick": "Select",
+      "pickOne": "Select {title}",
+      "titleAll": "Export the workspace",
+      "titleSome": "Export {n} report | Export {n} report | Export {n} reports",
+      "help": "Each report goes with its query.",
+      "withConnections": "Include the connections they use",
+      "withChannels": "Include the channels they deliver to",
+      "secrets": "Passwords and tokens are not exported: the file names an environment variable for each, which the import asks for.",
+      "download": "Download YAML"
+    },
+    "import": {
+      "file": "Choose a file",
+      "paste": "Or paste the YAML",
+      "analyze": "Check",
+      "errors": "The documents have problems:",
+      "line": "line {line}",
+      "missingTitle": "Missing references",
+      "missingHelp": "The documents use connections or channels that do not exist here. Pick existing ones to use instead.",
+      "choose": "Choose...",
+      "secretsTitle": "Secrets",
+      "secretsHelp": "Values for the secrets the documents ask for. They are stored encrypted with the resource.",
+      "secretRequired": "Needed ({env}).",
+      "secretOptional": "Leave empty to keep the current value ({env}).",
+      "planTitle": "Plan",
+      "summary": "{create} to create, {update} to update, {unchanged} unchanged, {skip} skipped, {conflict} to decide.",
+      "as": "as {name}",
+      "decide": "Decide...",
+      "policies": {
+        "overwrite": "Overwrite",
+        "copy": "Import as a copy",
+        "skip": "Skip"
+      },
+      "actions": {
+        "create": "Create",
+        "update": "Update",
+        "unchanged": "Unchanged",
+        "conflict": "Exists and differs",
+        "skip": "Skip"
+      },
+      "kinds": {
+        "Connection": "Connection",
+        "Channel": "Channel",
+        "Query": "Query",
+        "Report": "Report"
+      },
+      "none": "(none)",
+      "secretChanges": "(the secret changes)",
+      "apply": "Apply",
+      "blocked": "Resolve the items above to apply.",
+      "applied": "Documents applied",
+      "done": "Everything was applied in one go."
+    },
+    "managed": {
+      "title": "Managed by the configuration directory",
+      "body": "This comes from the GitOps directory and is applied again when the server starts, so it is read only here.",
+      "detach": "Edit anyway",
+      "detachImpact": "Detach it from the configuration directory? You can then change it here, and the directory stops changing it until an admin gives it back.",
+      "detached": "Detached: you can change it here.",
+      "attached": "Given back to the configuration directory; it applies at the next start.",
+      "detachedBody": "Detached from the configuration directory: changes made here are kept.",
+      "attach": "Give back to the directory",
+      "orphan": "This report left the configuration directory, so it was paused. Put its document back to resume it, or delete it.",
+      "orphanBadge": "Orphan"
+    }
+  },
+  "units": {
+    "bytes": "{n} bytes",
+    "kb": "{n} KB",
+    "mb": "{n} MB",
+    "gb": "{n} GB",
+    "tb": "{n} TB"
+  },
+  "passkeys": {
+    "title": "Passkeys",
+    "help": "Sign in with your fingerprint, face or device PIN instead of a password. A passkey also counts as two-factor authentication.",
+    "unavailable": "Passkeys are not available: the server needs its public URL (ROWBIRD_BASE_URL), and the browser must support them.",
+    "add": "Add a passkey",
+    "addHelp": "Your browser will ask where to save it: this device, your phone or a security key.",
+    "name": "Name",
+    "nameHint": "Something to recognize it by, like \"Work laptop\".",
+    "create": "Continue",
+    "added": "Passkey added.",
+    "addedAt": "Added {when}",
+    "lastUsed": "last used {when}",
+    "neverUsed": "never used",
+    "synced": "Synced",
+    "rename": "Rename",
+    "remove": "Remove",
+    "removeTitle": "Remove passkey {name}",
+    "removeHelp": "You will no longer be able to sign in with it. If it is your only second factor and your workspace requires one, you will be asked to set one up again.",
+    "removed": "Passkey removed.",
+    "none": "You have no passkeys yet."
+  },
+  "palette": {
+    "open": "Search or jump to…",
+    "title": "Command palette",
+    "help": "Type to find a page, an action, or a report, query, connection or channel.",
+    "placeholder": "Find a page, report, query, connection or channel…",
+    "empty": "Nothing matches.",
+    "create": "create",
+    "groups": {
+      "actions": "Create",
+      "pages": "Pages",
+      "reports": "Reports",
+      "queries": "Queries",
+      "connections": "Connections",
+      "channels": "Channels"
+    }
+  },
+  "forgotPassword": {
+    "title": "Reset your password",
+    "help": "Enter the email of your account and we will send a link to choose a new password.",
+    "submit": "Send the link",
+    "sent": "If {email} has an account here, a link to reset its password is on its way. It works once, within 30 minutes. Check your spam folder too.",
+    "back": "Back to sign in"
+  },
+  "resetPassword": {
+    "title": "Choose a new password",
+    "help": "Pick a new password for your account. You will be signed out of every device.",
+    "submit": "Save the new password",
+    "done": "Your password was changed. Sign in with it now.",
+    "signIn": "Sign in",
+    "again": "Ask for a new link"
+  }
+}

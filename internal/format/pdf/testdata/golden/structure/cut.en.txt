@@ -1,0 +1,39 @@
+maroto
+  page
+    row "16"
+      col "100"
+        text "Vendas por região" bold
+        text "Generated on 2026-09-25 09:00"
+    row "5.822222222222223"
+      col "23"
+        text "n" right bold
+      col "48"
+        text "name" bold
+      col "29"
+        text "amount" right bold
+    row "5.822222222222223"
+      col "23"
+        text "1" right
+      col "48"
+        text "Customer 001"
+      col "29"
+        text "137.00" right
+    row "5.822222222222223"
+      col "23"
+        text "2" right
+      col "48"
+        text "Customer 002"
+      col "29"
+        text "274.01" right
+    row "5.822222222222223"
+      col "23"
+        text "3" right
+      col "48"
+        text "Customer 003"
+      col "29"
+        text "411.02" right
+    row "5.822222222222223"
+      col "0"
+        text "Showing 3 of 12,000 rows. The result was cut at the row limit."
+    row "221.886388888"
+      col "100"

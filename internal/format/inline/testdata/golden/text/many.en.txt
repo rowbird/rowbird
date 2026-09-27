@@ -1,0 +1,23 @@
+<pre> n  name            amount
+--  ------------  --------
+ 1  Customer 001    137.00
+ 2  Customer 002    274.01
+ 3  Customer 003    411.02
+ 4  Customer 004    548.03
+ 5  Customer 005    685.04
+ 6  Customer 006    822.05
+ 7  Customer 007    959.06
+ 8  Customer 008  1,096.07
+ 9  Customer 009  1,233.08
+10  Customer 010  1,370.09
+11  Customer 011  1,507.10
+12  Customer 012  1,644.11
+13  Customer 013  1,781.12
+14  Customer 014  1,918.13
+15  Customer 015  2,055.14
+16  Customer 016  2,192.15
+17  Customer 017  2,329.16
+18  Customer 018  2,466.17
+19  Customer 019  2,603.18
+20  Customer 020  2,740.19</pre>
+Showing 20 of 1,000 rows. The result was cut at the row limit. <a href="https://rowbird.example.com/runs/01900000-0000-7000-8000-000000000001">View the full report</a>

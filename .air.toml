@@ -1,0 +1,17 @@
+# Live reload for `make dev`. The binary serves the API on :8080; Vite serves the UI and proxies to it.
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/rowbird ./cmd/rowbird"
+entrypoint = ["./tmp/rowbird", "serve"]
+include_ext = ["go", "sql", "json", "yaml"]
+exclude_dir = ["web", "tmp", "bin", "docs", ".data", "testdata"]
+exclude_regex = ["_test\\.go$"]
+delay = 300
+
+[log]
+time = false
+
+[misc]
+clean_on_exit = true

@@ -1,0 +1,4 @@
+{
+  "plugin.format.xlsx.name": "Excel",
+  "plugin.format.xlsx.description": "Uma planilha do Excel com células tipadas, cabeçalho fixo e filtros."
+}

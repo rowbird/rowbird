@@ -1,0 +1,16 @@
+{
+  "plugin.slack.api_base.label": "API address",
+  "plugin.slack.auth.bot": "Bot token",
+  "plugin.slack.auth.help": "A bot token can post to any channel the bot is in and attach files. An incoming webhook posts messages to one channel, without files.",
+  "plugin.slack.auth.label": "Connection",
+  "plugin.slack.auth.webhook": "Incoming webhook",
+  "plugin.slack.bot_token.help": "Starts with xoxb-. The app needs the chat:write and files:write scopes.",
+  "plugin.slack.bot_token.label": "Bot token",
+  "plugin.slack.channel.help": "A channel id or #name, for bot tokens. Incoming webhooks post to their own channel.",
+  "plugin.slack.channel.label": "Channel",
+  "plugin.slack.description": "Sends each run to a Slack channel, with the result and the files.",
+  "plugin.slack.message.default": "*{{report.name}}*\n{{run.rows}} rows · {{run.started_at}}",
+  "plugin.slack.message.label": "Message",
+  "plugin.slack.name": "Slack",
+  "plugin.slack.webhook_url.label": "Webhook URL"
+}

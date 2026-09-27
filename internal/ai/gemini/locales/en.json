@@ -1,0 +1,6 @@
+{
+  "plugin.gemini.name": "Google Gemini",
+  "plugin.gemini.description": "Gemini models through the Gemini API, with answers checked against a schema.",
+  "plugin.gemini.model.help": "The model id, for example gemini-2.5-pro or gemini-2.5-flash.",
+  "plugin.gemini.base_url.help": "Change only to go through a proxy that serves the same API."
+}

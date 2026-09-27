@@ -1,0 +1,6 @@
+{
+  "ai.api_key.label": "API key",
+  "ai.model.label": "Model",
+  "ai.base_url.label": "API address",
+  "ai.timeout_seconds.label": "Timeout (seconds)"
+}

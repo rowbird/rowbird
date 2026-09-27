@@ -1,0 +1,82 @@
+version: "2"
+
+run:
+  build-tags:
+    - integration
+
+linters:
+  default: standard
+  enable:
+    - bodyclose
+    - depguard
+    - errorlint
+    - gosec
+    - misspell
+    - nilerr
+    - noctx
+    - revive
+    - sloglint
+    - unconvert
+  settings:
+    depguard:
+      rules:
+        store-access:
+          # The internal store is the only place allowed to talk to the internal database, which is
+          # how workspace scoping is enforced centrally (ADR-0007, ADR-0015).
+          files:
+            - "$all"
+            - "!**/internal/store/**"
+          deny:
+            - pkg: github.com/uptrace/bun
+              desc: use the repositories in internal/store instead
+            - pkg: github.com/pressly/goose
+              desc: migrations live in internal/store
+        internal-drivers:
+          files:
+            - "$all"
+            - "!**/internal/store/**"
+            - "!**/internal/connector/**"
+            # Integration tests build their fixtures with the database drivers directly.
+            - "!**/*_integration_test.go"
+          deny:
+            - pkg: modernc.org/sqlite
+              desc: database drivers are only used by internal/store and connectors
+            - pkg: github.com/jackc/pgx
+              desc: database drivers are only used by internal/store and connectors
+    revive:
+      rules:
+        - name: exported
+          disabled: true
+        - name: package-comments
+          disabled: true
+    sloglint:
+      attr-only: false
+      kv-only: false
+      no-global: default
+      context: scope
+      static-msg: true
+      key-naming-case: snake
+    gosec:
+      excludes:
+        - G104 # covered by errcheck
+  exclusions:
+    generated: strict
+    presets:
+      - comments
+      - std-error-handling
+    rules:
+      - path: _test\.go
+        linters:
+          - gosec
+          - noctx
+          - bodyclose
+          - sloglint
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/rowbird/rowbird

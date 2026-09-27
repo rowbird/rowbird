@@ -1,0 +1,6 @@
+{
+  "plugin.anthropic.name": "Anthropic",
+  "plugin.anthropic.description": "Modelos Claude pela API da Anthropic, com as respostas conferidas contra um schema.",
+  "plugin.anthropic.model.help": "O id do modelo, por exemplo claude-opus-5, claude-sonnet-5 ou claude-haiku-4-5.",
+  "plugin.anthropic.base_url.help": "Mude só para passar por um proxy que atende a mesma API."
+}

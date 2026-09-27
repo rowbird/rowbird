@@ -1,0 +1,111 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rowbird-data
+  labels: { app.kubernetes.io/name: rowbird }
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rowbird
+  labels: { app.kubernetes.io/name: rowbird }
+data:
+  ROWBIRD_BASE_URL: https://rowbird.example.com
+  ROWBIRD_LOG_FORMAT: json
+  ROWBIRD_BACKUP_SCHEDULE: "0 3 * * *"
+  # Pod network range of your cluster, so client addresses behind the ingress are trusted.
+  ROWBIRD_TRUSTED_PROXIES: 10.0.0.0/8
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rowbird
+  labels: { app.kubernetes.io/name: rowbird }
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate # SQLite: never two pods on the same database
+  selector:
+    matchLabels: { app.kubernetes.io/name: rowbird }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: rowbird }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        seccompProfile: { type: RuntimeDefault }
+      terminationGracePeriodSeconds: 45
+      containers:
+        - name: rowbird
+          image: ghcr.io/rowbird/rowbird:1.0.0
+          args: [serve]
+          ports:
+            - { name: http, containerPort: 8080 }
+          envFrom:
+            - configMapRef: { name: rowbird }
+          env:
+            - name: ROWBIRD_MASTER_KEY
+              valueFrom:
+                secretKeyRef: { name: rowbird, key: master-key }
+          volumeMounts:
+            - { name: data, mountPath: /data }
+            - { name: tmp, mountPath: /tmp } # SQLite may spill large sorts to temporary files
+          readinessProbe:
+            httpGet: { path: /health/ready, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health/live, port: http }
+            periodSeconds: 20
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { memory: 1Gi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: rowbird-data }
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rowbird
+  labels: { app.kubernetes.io/name: rowbird }
+spec:
+  selector: { app.kubernetes.io/name: rowbird }
+  ports:
+    - { name: http, port: 80, targetPort: http }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rowbird
+  labels: { app.kubernetes.io/name: rowbird }
+  annotations:
+    # ingress-nginx: keep server-sent events (live run updates) unbuffered and allow long streams.
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: [rowbird.example.com]
+      secretName: rowbird-tls
+  rules:
+    - host: rowbird.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: rowbird, port: { name: http } }

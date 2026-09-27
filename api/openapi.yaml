@@ -1,0 +1,5757 @@
+openapi: 3.0.3
+info:
+  title: Rowbird API
+  version: 1.0.0
+  description: |
+    HTTP API of Rowbird, a self-hosted service that runs SQL queries on a schedule and delivers the
+    results. This document is the source of truth for the API (ADR-0005): the Go server interfaces
+    and the TypeScript client are generated from it.
+
+    Conventions (docs/spec/05-api.md):
+
+    - Application endpoints live under `/api/v1`. Health endpoints live under `/health`.
+    - IDs are UUIDv7 strings. Times are RFC 3339 in UTC.
+    - Lists use cursor pagination: `?limit=50&cursor=...` returns `{ "items": [...], "next_cursor": "..." }`.
+    - Errors use RFC 9457 `application/problem+json` with a stable `code` and an `i18n_key`.
+    - Updates send the current `version`; a mismatch returns `409` with `code: conflict.version`.
+    - Secrets are never returned. Secret fields are shown as `{ "configured": true }`.
+    - State-changing requests must send `Content-Type: application/json`. Requests authenticated
+      with the session cookie must also send `X-CSRF-Token` with the value of the `rowbird_csrf`
+      cookie.
+
+    Authorization is declared on each operation with `x-rowbird-authz` (ADR-0017):
+
+    - `role`: minimum workspace role (`viewer` < `editor` < `admin`).
+    - `scope`: minimum API key scope (`read` < `run` < `write` < `admin`). Sessions hold every scope.
+    - `session_only`: API keys cannot call the operation (account self-service).
+    - `allow_restricted`: sessions that must change their password or set up two-factor
+      authentication may call it. Every other operation answers `403` with
+      `auth.password_change_required` or `auth.mfa_setup_required` for such sessions.
+
+    Operations with `security: []` are public and carry no `x-rowbird-authz`.
+  license:
+    name: Apache-2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: /
+tags:
+  - name: config
+    description: Configuration as code (YAML export, import and the GitOps directory).
+  - name: ai
+    description: The AI assistant (proposals only; nothing runs by itself).
+  - name: health
+    description: Liveness and readiness probes. Public, never contain secrets.
+  - name: setup
+    description: First-run wizard. Available until the first user exists.
+  - name: auth
+    description: Sign in and sign out.
+  - name: me
+    description: The signed-in user's profile, password, sessions and two-factor authentication.
+  - name: users
+    description: Workspace members and their roles.
+  - name: api-keys
+    description: Keys for automation. Managed by admins.
+  - name: settings
+    description: Workspace settings.
+  - name: security-events
+    description: Audit trail of security-relevant actions, for admins.
+  - name: system
+    description: The instance itself (storage, backups, version), for admins.
+  - name: plugins
+    description: Installed plugins with their configuration schemas, capabilities and translations.
+  - name: connections
+    description: User databases. Rowbird only reads from them.
+  - name: queries
+    description: Named, versioned SQL bound to a connection, and its preview.
+  - name: channels
+    description: Destinations with their settings (email, chats, webhooks, buckets) and health.
+  - name: links
+    description: Shared links to run files, with expiry, revocation and a download log.
+  - name: reports
+    description: Queries on a schedule, with a condition, and their schedules.
+  - name: runs
+    description: Executions of reports, scheduled or manual.
+  - name: notifications
+    description: In-app notifications of the signed-in user, and the real-time event stream.
+
+# Deny by default: every operation requires a session or an API key unless it overrides this.
+security:
+  - sessionCookie: []
+  - bearerAuth: []
+
+paths:
+  /health/live:
+    get:
+      operationId: getHealthLive
+      tags: [health]
+      summary: Liveness probe
+      description: Returns 200 while the process is running.
+      security: []
+      responses:
+        "200":
+          description: The process is up.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Liveness"
+  /health/ready:
+    get:
+      operationId: getHealthReady
+      tags: [health]
+      summary: Readiness probe
+      description: |
+        Returns 200 when every component is healthy and 503 otherwise. The body lists each
+        component (for example `store` and `migrations`) with its state.
+      security: []
+      responses:
+        "200":
+          description: Ready to serve traffic.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Readiness"
+        "503":
+          description: At least one component is unhealthy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Readiness"
+
+  /api/v1/setup/status:
+    get:
+      operationId: getSetupStatus
+      tags: [setup]
+      summary: Whether the setup wizard must run
+      security: []
+      responses:
+        "200":
+          description: Setup status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SetupStatus"
+  /api/v1/setup:
+    post:
+      operationId: runSetup
+      tags: [setup]
+      summary: Create the first admin and sign in
+      description: |
+        Creates the default workspace, the first admin and the initial settings, then starts a
+        session (see `login`). Answers `409 setup.completed` once any user exists.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetupRequest"
+      responses:
+        "201":
+          $ref: "#/components/responses/SignedIn"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/v1/auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Sign in with email and password
+      description: |
+        On success sets the `rowbird_session` (HttpOnly) and `rowbird_csrf` cookies. When the
+        account has two-factor authentication, answers `status: mfa_required` with a challenge
+        token for `loginSecondFactor` instead. Errors are deliberately generic.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Signed in, or a second factor is required.
+          headers:
+            Set-Cookie:
+              description: Session and CSRF cookies, when `status` is `authenticated`.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoginResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/login/second-factor:
+    post:
+      operationId: loginSecondFactor
+      tags: [auth]
+      summary: Finish signing in with a TOTP code or a recovery code
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SecondFactorRequest"
+      responses:
+        "200":
+          $ref: "#/components/responses/SignedIn"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/login/second-factor/passkey:
+    post:
+      operationId: beginPasskeySecondFactor
+      tags: [auth]
+      summary: Start the passkey step of a sign-in
+      description: |
+        For a login answered with `mfa_required` whose `methods` include `passkey`. Returns the
+        options for `navigator.credentials.get`; the browser's answer goes to `loginSecondFactor`
+        as `passkey`.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChallengeTokenRequest"
+      responses:
+        "200":
+          description: The WebAuthn request options.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasskeyOptions"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/passkey/options:
+    post:
+      operationId: beginPasskeyLogin
+      tags: [auth]
+      summary: Start signing in with a passkey, without a password
+      description: Returns the options for `navigator.credentials.get` and a token for `passkeyLogin`. Needs `ROWBIRD_BASE_URL`.
+      security: []
+      responses:
+        "200":
+          description: The ceremony.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasskeyCeremony"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/passkey:
+    post:
+      operationId: passkeyLogin
+      tags: [auth]
+      summary: Finish signing in with a passkey
+      description: |
+        The passkey verified the user (PIN or biometrics), so it satisfies the workspace's
+        two-factor requirement. Sets the session cookies like `login`.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasskeyAnswer"
+      responses:
+        "200":
+          $ref: "#/components/responses/SignedIn"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/oidc/login:
+    get:
+      operationId: oidcLogin
+      tags: [auth]
+      summary: Leave for the identity provider (OIDC)
+      description: |
+        Redirects the browser to the provider with the authorization code flow and PKCE. State,
+        nonce and verifier travel in a short-lived encrypted cookie. When OIDC is not available the
+        browser goes back to `/login?oidc_error=<code>`.
+      security: []
+      parameters:
+        - name: redirect
+          in: query
+          description: The app path to continue to after signing in.
+          schema:
+            type: string
+      responses:
+        "302":
+          description: To the provider, or back to the login page with an error code.
+          headers:
+            Location:
+              schema:
+                type: string
+  /api/v1/auth/oidc/callback:
+    get:
+      operationId: oidcCallback
+      tags: [auth]
+      summary: Come back from the identity provider
+      description: |
+        Exchanges the code, verifies the ID token and signs the user in: the user linked to the
+        identity, else the user with the same verified email (then linked), else a new user when
+        auto-provisioning allows it. Redirects to the app, or to `/login?oidc_error=<code>`.
+      security: []
+      parameters:
+        - name: code
+          in: query
+          schema:
+            type: string
+        - name: state
+          in: query
+          schema:
+            type: string
+        - name: error
+          in: query
+          description: Set by the provider when the user cancelled or it refused.
+          schema:
+            type: string
+        - name: rowbird_oidc
+          in: cookie
+          description: The flow cookie set by `oidcLogin`.
+          schema:
+            type: string
+      responses:
+        "302":
+          description: Into the app with the session cookies, or back to the login page.
+          headers:
+            Location:
+              schema:
+                type: string
+  /api/v1/auth/password-reset:
+    post:
+      operationId: requestPasswordReset
+      tags: [auth]
+      summary: Email a link to choose a new password
+      description: |
+        Always answers 202 with no body, whether or not the email belongs to an account, so it does
+        not reveal who has one. When the account exists, is active and has a password, and the
+        workspace has a system mailer and `ROWBIRD_BASE_URL`, a one-use link valid for 30 minutes is
+        emailed (at most once every 5 minutes per account; a new request replaces earlier links).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetRequest"
+      responses:
+        "202":
+          description: Accepted.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/password-reset/confirm:
+    post:
+      operationId: confirmPasswordReset
+      tags: [auth]
+      summary: Choose a new password with an emailed link
+      description: |
+        Sets the password, unlocks the account and signs the user out everywhere. It does not sign
+        in; a second factor is still asked at the next sign-in. `410 auth.reset_invalid` for an
+        unknown, used or expired link.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetConfirm"
+      responses:
+        "204":
+          description: The password was changed.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "410":
+          $ref: "#/components/responses/Gone"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+  /api/v1/auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Sign out of the current session
+      x-rowbird-authz: { role: viewer, scope: read, session_only: true, allow_restricted: true }
+      responses:
+        "204":
+          description: Signed out; cookies are cleared.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/me:
+    get:
+      operationId: getMe
+      tags: [me]
+      summary: The signed-in user
+      x-rowbird-authz: { role: viewer, scope: read, allow_restricted: true }
+      responses:
+        "200":
+          description: The caller.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    patch:
+      operationId: updateMe
+      tags: [me]
+      summary: Update name and preferences
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true, allow_restricted: true }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MePatch"
+      responses:
+        "200":
+          description: The updated caller.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Me"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/me/password:
+    post:
+      operationId: changeMyPassword
+      tags: [me]
+      summary: Change the password
+      description: Requires the current password. Other sessions are signed out.
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true, allow_restricted: true }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordChange"
+      responses:
+        "204":
+          description: Password changed.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/me/sessions:
+    get:
+      operationId: listMySessions
+      tags: [me]
+      summary: Active sessions of the caller
+      x-rowbird-authz: { role: viewer, scope: read, session_only: true }
+      responses:
+        "200":
+          description: Sessions, most recently used first.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SessionList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/me/sessions/{sessionId}/revoke:
+    post:
+      operationId: revokeMySession
+      tags: [me]
+      summary: Sign out one session
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true }
+      parameters:
+        - $ref: "#/components/parameters/SessionId"
+      responses:
+        "204":
+          description: Session revoked.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/me/sessions/revoke-all:
+    post:
+      operationId: revokeAllMySessions
+      tags: [me]
+      summary: Sign out everywhere, including this session
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true }
+      responses:
+        "204":
+          description: Every session revoked; cookies are cleared.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/me/2fa/totp/setup:
+    post:
+      operationId: beginTotpSetup
+      tags: [me]
+      summary: Start enrolling an authenticator app
+      description: Returns a new secret. It becomes active after `confirmTotpSetup`.
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true, allow_restricted: true }
+      responses:
+        "200":
+          description: Enrollment data, shown once.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TotpSetup"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/me/2fa/totp/confirm:
+    post:
+      operationId: confirmTotpSetup
+      tags: [me]
+      summary: Activate the authenticator app with a first code
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true, allow_restricted: true }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CodeRequest"
+      responses:
+        "200":
+          description: Two-factor authentication is on. Recovery codes are shown once.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecoveryCodes"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/me/2fa/totp/disable:
+    post:
+      operationId: disableTotp
+      tags: [me]
+      summary: Turn off two-factor authentication
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordConfirmation"
+      responses:
+        "204":
+          description: Two-factor authentication is off.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/me/2fa/recovery-codes:
+    post:
+      operationId: regenerateRecoveryCodes
+      tags: [me]
+      summary: Replace the recovery codes
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordConfirmation"
+      responses:
+        "200":
+          description: New recovery codes, shown once. The old ones stop working.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecoveryCodes"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/v1/me/passkeys:
+    get:
+      operationId: listMyPasskeys
+      tags: [me]
+      summary: The caller's passkeys
+      x-rowbird-authz: { role: viewer, scope: read, session_only: true, allow_restricted: true }
+      responses:
+        "200":
+          description: The passkeys.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasskeyList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      operationId: addMyPasskey
+      tags: [me]
+      summary: Finish adding a passkey
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true, allow_restricted: true }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasskeyRegistration"
+      responses:
+        "201":
+          description: The passkey was added.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Passkey"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/me/passkeys/options:
+    post:
+      operationId: beginMyPasskeyRegistration
+      tags: [me]
+      summary: Start adding a passkey
+      description: Requires the current password, like other changes to two-factor authentication (accounts without a password skip it).
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true, allow_restricted: true }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OptionalPassword"
+      responses:
+        "200":
+          description: The options for `navigator.credentials.create` and a token for `addMyPasskey`.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasskeyCeremony"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/me/passkeys/{passkeyId}:
+    parameters:
+      - name: passkeyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    patch:
+      operationId: renameMyPasskey
+      tags: [me]
+      summary: Rename a passkey
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasskeyRename"
+      responses:
+        "200":
+          description: The renamed passkey.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Passkey"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/me/passkeys/{passkeyId}/remove:
+    parameters:
+      - name: passkeyId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      operationId: removeMyPasskey
+      tags: [me]
+      summary: Remove a passkey
+      x-rowbird-authz: { role: viewer, scope: write, session_only: true }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OptionalPassword"
+      responses:
+        "204":
+          description: The passkey was removed.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/v1/users:
+    get:
+      operationId: listUsers
+      tags: [users]
+      summary: Members of the workspace
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: A page of users, newest first.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      operationId: createUser
+      tags: [users]
+      summary: Add a user with a temporary password
+      description: |
+        The temporary password is returned once. The user must change it at the first sign-in.
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCreate"
+      responses:
+        "201":
+          description: User created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserCreated"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/users/{userId}:
+    get:
+      operationId: getUser
+      tags: [users]
+      summary: One member of the workspace
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: The user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateUser
+      tags: [users]
+      summary: Change name, role or enabled state
+      description: |
+        Role changes and disabling sign the user out everywhere; disabling also revokes their API
+        keys. The last active admin cannot be demoted or disabled (`user.last_admin`), and admins
+        cannot demote or disable themselves (`user.self_modification`).
+      x-rowbird-authz: { role: admin, scope: admin }
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPatch"
+      responses:
+        "200":
+          description: The updated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/users/{userId}/reset-password:
+    post:
+      operationId: resetUserPassword
+      tags: [users]
+      summary: Give the user a new temporary password
+      description: Signs the user out everywhere, unlocks the account and returns the password once.
+      x-rowbird-authz: { role: admin, scope: admin }
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "200":
+          description: The temporary password.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TemporaryPassword"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/users/{userId}/2fa/disable:
+    post:
+      operationId: disableUserTotp
+      tags: [users]
+      summary: Turn off another user's two-factor authentication
+      x-rowbird-authz: { role: admin, scope: admin }
+      parameters:
+        - $ref: "#/components/parameters/UserId"
+      responses:
+        "204":
+          description: Two-factor authentication is off for the user.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/v1/api-keys:
+    get:
+      operationId: listApiKeys
+      tags: [api-keys]
+      summary: API keys of the workspace
+      x-rowbird-authz: { role: admin, scope: admin }
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+      responses:
+        "200":
+          description: A page of keys, newest first. Keys themselves are never returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyPage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      operationId: createApiKey
+      tags: [api-keys]
+      summary: Create an API key
+      description: The key is returned once and cannot be retrieved later.
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiKeyCreate"
+      responses:
+        "201":
+          description: Key created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKeyCreated"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/api-keys/{apiKeyId}/revoke:
+    post:
+      operationId: revokeApiKey
+      tags: [api-keys]
+      summary: Revoke an API key
+      x-rowbird-authz: { role: admin, scope: admin }
+      parameters:
+        - $ref: "#/components/parameters/ApiKeyId"
+      responses:
+        "200":
+          description: The revoked key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKey"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/v1/settings:
+    get:
+      operationId: getSettings
+      tags: [settings]
+      summary: Workspace settings
+      x-rowbird-authz: { role: viewer, scope: read }
+      responses:
+        "200":
+          description: The settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    patch:
+      operationId: updateSettings
+      tags: [settings]
+      summary: Change workspace settings
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SettingsPatch"
+      responses:
+        "200":
+          description: The updated settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Settings"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/system/about:
+    get:
+      operationId: getAbout
+      tags: [system]
+      summary: Version of this instance and the latest release
+      x-rowbird-authz: { role: viewer, scope: read }
+      responses:
+        "200":
+          description: The version information.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/About"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v1/system/storage:
+    get:
+      operationId: getStorageStatus
+      tags: [system]
+      summary: Artifact storage, retention and scheduled backups
+      x-rowbird-authz: { role: admin, scope: admin }
+      responses:
+        "200":
+          description: The status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageStatus"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/settings/oidc:
+    get:
+      operationId: getOIDCSettings
+      tags: [settings]
+      summary: Single sign-on (OIDC) settings
+      x-rowbird-authz: { role: admin, scope: admin }
+      responses:
+        "200":
+          description: The settings; the client secret only as configured or not.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OIDCSettings"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    put:
+      operationId: updateOIDCSettings
+      tags: [settings]
+      summary: Change the single sign-on (OIDC) settings
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OIDCSettingsInput"
+      responses:
+        "200":
+          description: The saved settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OIDCSettings"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/settings/oidc/test:
+    post:
+      operationId: testOIDCSettings
+      tags: [settings]
+      summary: Read the provider's discovery document
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OIDCTestRequest"
+      responses:
+        "200":
+          description: Whether the provider answered.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OIDCTestResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/settings/alerts:
+    get:
+      operationId: getAlertSettings
+      tags: [settings]
+      summary: System alert channels and the outbound heartbeat
+      x-rowbird-authz: { role: admin, scope: admin }
+      responses:
+        "200":
+          description: The settings. The heartbeat URL is secret and never returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertSettings"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    put:
+      operationId: updateAlertSettings
+      tags: [settings]
+      summary: Replace the system alert and heartbeat settings
+      description: |
+        Alerts go to the primary channel and, when sending there fails, to the fallback. Each
+        channel must support alerts; its options are validated by its destination's delivery
+        schema (recipients, chat, Slack channel). Leaving `heartbeat_url` out keeps the stored
+        URL, an empty string removes it.
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AlertSettingsInput"
+      responses:
+        "200":
+          description: The updated settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertSettings"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/settings/ai:
+    get:
+      operationId: getAISettings
+      tags: [settings]
+      summary: The AI assistant's provider and its settings
+      x-rowbird-authz: { role: admin, scope: admin }
+      responses:
+        "200":
+          description: 'The settings. Secret fields appear as `{ "configured": true|false }`.'
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AISettings"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    put:
+      operationId: updateAISettings
+      tags: [settings]
+      summary: Choose the AI provider, or turn the assistant off
+      description: |
+        The configuration is validated by the provider's schema (`GET /plugins`, kind
+        `ai_provider`). When the provider stays the same, a secret left out or sent as the
+        placeholder keeps its stored value. An empty provider turns the assistant off and removes
+        the settings; without a provider nothing is ever sent to an AI service.
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AISettingsInput"
+      responses:
+        "200":
+          description: The updated settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AISettings"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/settings/ai/test:
+    post:
+      operationId: testAISettings
+      tags: [settings]
+      summary: Check AI settings before saving them
+      description: Checks the key and the model with the cheapest call the provider allows (usually reading the model).
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AISettingsInput"
+      responses:
+        "200":
+          description: The outcome; a failure is not an HTTP error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AITestResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/ai/status:
+    get:
+      operationId: getAIStatus
+      tags: [ai]
+      summary: Whether the AI assistant is available
+      x-rowbird-authz: { role: viewer, scope: read }
+      responses:
+        "200":
+          description: The status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AIStatus"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /api/v1/ai/generate:
+    post:
+      operationId: generateAIProposal
+      tags: [ai]
+      summary: Ask the AI assistant for a query or a schedule
+      description: |
+        Sends the request with the connection's dialect and cached schema, without the tables
+        excluded from AI and never any rows, to the configured provider. The answer is a proposal:
+        nothing is run or saved. Limited to 20 requests per 10 minutes per user on each instance.
+      x-rowbird-authz: { role: editor, scope: run }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AIGenerateRequest"
+      responses:
+        "200":
+          description: The proposal.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AIProposal"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
+
+  /api/v1/export:
+    post:
+      operationId: exportConfig
+      tags: [config]
+      summary: Export reports, queries, connections and channels as YAML
+      description: |
+        Without reports or queries, exports the whole workspace. Documents come in a fixed order
+        with sorted keys, so exports diff cleanly in Git. Secrets are never exported: they become
+        `${env:ROWBIRD_<KIND>_<NAME>_<FIELD>}` placeholders (docs/spec/09-config-as-code.md).
+      x-rowbird-authz: { role: editor, scope: read }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExportRequest"
+      responses:
+        "200":
+          description: The YAML documents.
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+          content:
+            application/yaml:
+              schema:
+                type: string
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/import:
+    post:
+      operationId: importConfig
+      tags: [config]
+      summary: Plan or apply YAML documents
+      description: |
+        Parses the documents, resolves references by name (`map` points missing ones elsewhere)
+        and `${env:NAME}` secrets (from `secrets`), and compares them with the workspace. With
+        `dry_run` (the default) the plan is returned after a rolled-back apply, so it shows every
+        error a real apply would. Otherwise the plan is applied in one transaction, or not at all.
+        Problems in the documents are answered with `200` and `errors`, with file and line.
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImportRequest"
+      responses:
+        "200":
+          description: The plan, and whether it was applied.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/gitops/detach:
+    post:
+      operationId: detachFromGitOps
+      tags: [config]
+      summary: Let the UI change a resource the configuration directory manages
+      description: The directory stops changing the resource until it is attached again.
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagedResource"
+      responses:
+        "204":
+          description: Detached.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/v1/gitops/attach:
+    post:
+      operationId: attachToGitOps
+      tags: [config]
+      summary: Give a detached resource back to the configuration directory
+      description: The next apply of the directory (at startup) overwrites it again.
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagedResource"
+      responses:
+        "204":
+          description: Attached.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/v1/notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: The signed-in user's notifications, newest first
+      description: |
+        Repeated occurrences of the same problem are counted on one notification (`count`,
+        `last_at`) until it is resolved. `title_key` is an i18n key the client translates with
+        `params`.
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+        - name: unread
+          in: query
+          required: false
+          description: Only unread notifications.
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: A page of notifications and how many are unread.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationPage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/notifications/read-all:
+    post:
+      operationId: markAllNotificationsRead
+      tags: [notifications]
+      summary: Mark every notification of the signed-in user as read
+      x-rowbird-authz: { role: viewer, scope: read }
+      responses:
+        "200":
+          description: How many were marked.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarkedCount"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/notifications/{notificationId}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark one notification as read
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/NotificationId"
+      responses:
+        "200":
+          description: The notification.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Notification"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/dashboard:
+    get:
+      operationId: getDashboard
+      tags: [notifications]
+      summary: Home page summary and what the health banner shows
+      description: |
+        Next runs, recent failed and partial runs, the success rate of the last 7 and 30 days
+        (scheduled runs and manual runs that deliver; skipped runs are left out, partial runs are
+        not successes), failing channels and failing reports.
+      x-rowbird-authz: { role: viewer, scope: read }
+      responses:
+        "200":
+          description: The summary.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/events:
+    get:
+      operationId: getEvents
+      tags: [notifications]
+      summary: Real-time events as Server-Sent Events
+      description: |
+        A `text/event-stream` that stays open. Events: `run.updated` (`run_id`, `report_id`,
+        `status`), `report.updated` (`report_id`), `channel.health` (`channel_id`, `ok`) and
+        `notification.created` (`id`, `type`, `count`, only to its recipient). A comment line is
+        sent every 15 seconds to keep proxies from closing the connection; proxies must not buffer
+        this path. Events come from the instance that serves the stream, so with several
+        instances clients should also refresh now and then.
+      x-rowbird-authz: { role: viewer, scope: read }
+      responses:
+        "200":
+          description: The stream.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/security-events:
+    get:
+      operationId: listSecurityEvents
+      tags: [security-events]
+      summary: Security events, newest first
+      x-rowbird-authz: { role: admin, scope: admin }
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+        - name: type
+          in: query
+          required: false
+          description: Only events of this type.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A page of events.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecurityEventPage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/plugins:
+    get:
+      operationId: listPlugins
+      tags: [plugins]
+      summary: Installed plugins
+      description: |
+        Plugins grouped by kind, each with metadata, configuration schema (a JSON Schema subset with
+        `x-` extensions for order, secrets, groups and conditional fields) and capabilities, plus
+        the translations of every label they use.
+      x-rowbird-authz: { role: viewer, scope: read }
+      responses:
+        "200":
+          description: The plugin catalog.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PluginCatalog"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /api/v1/connections:
+    get:
+      operationId: listConnections
+      tags: [connections]
+      summary: Connections of the workspace, by name
+      x-rowbird-authz: { role: viewer, scope: read }
+      responses:
+        "200":
+          description: All connections.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectionList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      operationId: createConnection
+      tags: [connections]
+      summary: Add a connection
+      description: |
+        Saves the connection, then checks it and introspects its schema. A failing check does not
+        prevent saving; it is reported in `status` and `last_error`.
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectionCreate"
+      responses:
+        "201":
+          description: The connection.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Connection"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/connections/test:
+    post:
+      operationId: testConnectionConfig
+      tags: [connections]
+      summary: Test configuration that is not saved
+      description: |
+        With `connection_id`, secret placeholders (`{ "configured": true }`) are resolved from that
+        saved connection, so an edited form can be tested without re-entering passwords.
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectionTest"
+      responses:
+        "200":
+          description: The outcome; a failure is reported in the body, not as an HTTP error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectionTestResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/connections/{connectionId}:
+    get:
+      operationId: getConnection
+      tags: [connections]
+      summary: One connection
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/ConnectionId"
+      responses:
+        "200":
+          description: The connection.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Connection"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateConnection
+      tags: [connections]
+      summary: Change a connection
+      description: |
+        `config`, when sent, replaces the whole configuration. Secret fields keep their stored value
+        when absent or sent as `{ "configured": true }`, are removed when `null`, and are replaced
+        by a string. The driver cannot change.
+      x-rowbird-authz: { role: admin, scope: admin }
+      parameters:
+        - $ref: "#/components/parameters/ConnectionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConnectionPatch"
+      responses:
+        "200":
+          description: The updated connection.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Connection"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      operationId: deleteConnection
+      tags: [connections]
+      summary: Delete a connection that nothing uses
+      x-rowbird-authz: { role: admin, scope: admin }
+      parameters:
+        - $ref: "#/components/parameters/ConnectionId"
+      responses:
+        "204":
+          description: Deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/connections/{connectionId}/test:
+    post:
+      operationId: testConnection
+      tags: [connections]
+      summary: Test a saved connection
+      description: Records the outcome as the connection's status and refreshes the schema cache.
+      x-rowbird-authz: { role: admin, scope: admin }
+      parameters:
+        - $ref: "#/components/parameters/ConnectionId"
+      responses:
+        "200":
+          description: The outcome.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectionTestResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/connections/{connectionId}/schema:
+    get:
+      operationId: getConnectionSchema
+      tags: [connections]
+      summary: Cached schema of the database
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/ConnectionId"
+      responses:
+        "200":
+          description: Tables and columns, as last introspected.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseSchema"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/connections/{connectionId}/schema/refresh:
+    post:
+      operationId: refreshConnectionSchema
+      tags: [connections]
+      summary: Introspect the schema again
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/ConnectionId"
+      responses:
+        "200":
+          description: The fresh schema.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DatabaseSchema"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
+
+  /api/v1/queries:
+    get:
+      operationId: listQueries
+      tags: [queries]
+      summary: Queries of the workspace, most recently changed first
+      x-rowbird-authz: { role: viewer, scope: read }
+      responses:
+        "200":
+          description: All queries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueryList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      operationId: createQuery
+      tags: [queries]
+      summary: Create a query and its first version
+      description: The slug is derived from the title when omitted.
+      x-rowbird-authz: { role: editor, scope: write }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueryCreate"
+      responses:
+        "201":
+          description: The query.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Query"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/queries/preview:
+    post:
+      operationId: previewQuery
+      tags: [queries]
+      summary: Run SQL read-only with a row cap and a short timeout
+      description: |
+        Nothing is saved. Parameters are bound as driver parameters. Built-in dates are resolved in
+        `timezone` (the browser's), falling back to the workspace default. Rows use the column
+        types: integers beyond 2^53 and decimals arrive as strings, binary values as base64, dates
+        and times as ISO 8601 text.
+      x-rowbird-authz: { role: editor, scope: run }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreviewRequest"
+      responses:
+        "200":
+          description: The result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreviewResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "422":
+          $ref: "#/components/responses/Unprocessable"
+  /api/v1/queries/{queryId}:
+    get:
+      operationId: getQuery
+      tags: [queries]
+      summary: One query with its current version
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/QueryId"
+      responses:
+        "200":
+          description: The query.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Query"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateQuery
+      tags: [queries]
+      summary: Change a query
+      description: Changing `sql` or `params` creates a new version; identical values do not.
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/QueryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueryPatch"
+      responses:
+        "200":
+          description: The query.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Query"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      operationId: deleteQuery
+      tags: [queries]
+      summary: Delete a query that no report uses
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/QueryId"
+      responses:
+        "204":
+          description: Deleted with its versions.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/queries/{queryId}/versions:
+    get:
+      operationId: listQueryVersions
+      tags: [queries]
+      summary: Versions of a query, newest first
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/QueryId"
+      responses:
+        "200":
+          description: The versions, without their SQL.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueryVersionList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/queries/{queryId}/versions/{number}:
+    get:
+      operationId: getQueryVersion
+      tags: [queries]
+      summary: One version with its SQL
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/QueryId"
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: The version.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueryVersion"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/queries/{queryId}/restore:
+    post:
+      operationId: restoreQueryVersion
+      tags: [queries]
+      summary: Make a copy of an old version the current one
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/QueryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueryRestore"
+      responses:
+        "200":
+          description: The query with the new version.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Query"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/v1/reports:
+    get:
+      operationId: listReports
+      tags: [reports]
+      summary: Reports of the workspace, by title, with their last run
+      x-rowbird-authz: { role: viewer, scope: read }
+      responses:
+        "200":
+          description: All reports.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReportList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      operationId: createReport
+      tags: [reports]
+      summary: Create a report and schedule its first run
+      description: |
+        The slug is derived from the title when omitted, the time zone defaults to the workspace's
+        and every policy has a default. `param_overrides` must be user parameters of the query's
+        current version, and parameters without a default need a value.
+      x-rowbird-authz: { role: editor, scope: write }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportCreate"
+      responses:
+        "201":
+          description: The report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/reports/{reportId}:
+    get:
+      operationId: getReport
+      tags: [reports]
+      summary: One report
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "200":
+          description: The report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateReport
+      tags: [reports]
+      summary: Change a report
+      description: Changing `cron` or `timezone` recomputes the next run from now.
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReportPatch"
+      responses:
+        "200":
+          description: The report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      operationId: deleteReport
+      tags: [reports]
+      summary: Delete a report and its runs
+      description: A report with a pending or running run cannot be deleted (`report.run_active`).
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "204":
+          description: Deleted with its runs.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/reports/{reportId}/pause:
+    post:
+      operationId: pauseReport
+      tags: [reports]
+      summary: Stop scheduling a report
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "200":
+          description: The paused report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/reports/{reportId}/resume:
+    post:
+      operationId: resumeReport
+      tags: [reports]
+      summary: Schedule a paused report again from now
+      description: Also clears the failure streak that may have paused it.
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "200":
+          description: The report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Report"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/reports/{reportId}/run:
+    post:
+      operationId: runReport
+      tags: [reports]
+      summary: Queue a manual run
+      description: |
+        Runs the report now, even when it is paused or another run is in progress. With
+        `deliver: false` the run only shows its result: nothing is delivered and it never counts
+        toward failures or the `changed` condition. Repeating a request with the same
+        `Idempotency-Key` within 24 hours returns the first run with status 200.
+      x-rowbird-authz: { role: editor, scope: run }
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RunRequest"
+      responses:
+        "200":
+          description: The run already created with this idempotency key.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunSummary"
+        "202":
+          description: The queued run.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunSummary"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/schedules/preview:
+    post:
+      operationId: previewSchedule
+      tags: [reports]
+      summary: Next occurrences and description of a schedule
+      description: |
+        Five-field cron or @hourly, @daily, @weekly, @monthly, @yearly. Occurrences are computed in
+        the time zone: a local time skipped by daylight saving runs at the end of the gap, a
+        repeated one runs once.
+      x-rowbird-authz: { role: viewer, scope: read }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ScheduleRequest"
+      responses:
+        "200":
+          description: The preview.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SchedulePreview"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/runs:
+    get:
+      operationId: listRuns
+      tags: [runs]
+      summary: Runs, newest first
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+        - name: report_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          required: false
+          description: Only runs with one of these statuses.
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/RunStatus"
+        - name: trigger
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/RunTrigger"
+        - name: from
+          in: query
+          required: false
+          description: Runs created at or after this time.
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: false
+          description: Runs created before this time.
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: A page of runs.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunPage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/runs/{runId}:
+    get:
+      operationId: getRun
+      tags: [runs]
+      summary: One run with its steps, parameters, condition and result sample
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: The run.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/runs/{runId}/cancel:
+    post:
+      operationId: cancelRun
+      tags: [runs]
+      summary: Cancel a pending or running run
+      description: |
+        A pending run is cancelled at once. A running run is asked to stop: its query is cancelled on
+        the database server and the run ends as `cancelled` shortly after.
+      x-rowbird-authz: { role: editor, scope: run }
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: The run.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Run"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/v1/runs/{runId}/attempts/{attemptId}/retry:
+    post:
+      operationId: retryAttempt
+      tags: [runs]
+      summary: Send a failed delivery attempt again
+      description: |
+        Uses the run's stored files, without running the query again. The attempt's status goes
+        back to sending and its new tries add to its count. When every attempt of a partial run has
+        been sent, the run becomes a success.
+      x-rowbird-authz: { role: editor, scope: run }
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - $ref: "#/components/parameters/AttemptId"
+      responses:
+        "200":
+          description: The attempt after the resend.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryAttempt"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/runs/{runId}/result:
+    get:
+      operationId: downloadRunResult
+      tags: [runs]
+      summary: The run's result as a file
+      description: |
+        When the run delivered the format, the stored file is returned exactly as it was sent (see
+        the run's `files`, kept for `retention_artifacts_days`). Otherwise the result is available
+        for a day after a run that succeeded, was partial or was skipped (see `result_expires_at`),
+        and the file is generated on request with the caller's language and the report's time zone,
+        with the formatter's default options. Only file formatters are accepted.
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+        - name: format
+          in: query
+          required: false
+          description: |
+            A file formatter id from `GET /plugins`, such as `csv`, `xlsx`, `json` or `pdf`. Required;
+            declared optional so that authentication is checked before the request.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The file.
+          headers:
+            Content-Disposition:
+              description: Attachment with the file name, `<report slug>-<date>.<extension>`.
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "410":
+          $ref: "#/components/responses/Gone"
+
+  /api/v1/channels:
+    get:
+      operationId: listChannels
+      tags: [channels]
+      summary: Channels of the workspace, by name, with their health
+      x-rowbird-authz: { role: viewer, scope: read }
+      responses:
+        "200":
+          description: All channels.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChannelList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+    post:
+      operationId: createChannel
+      tags: [channels]
+      summary: Create a channel
+      description: Channels hold credentials, so only admins manage them.
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChannelCreate"
+      responses:
+        "201":
+          description: The channel.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Channel"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/channels/test:
+    post:
+      operationId: testChannelConfig
+      tags: [channels]
+      summary: Test unsaved channel settings
+      description: |
+        With `channel_id`, secret placeholders resolve from that saved channel. Email channels send
+        the test message to `to`, or to their own sender address.
+      x-rowbird-authz: { role: admin, scope: admin }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChannelTest"
+      responses:
+        "200":
+          description: The outcome; a failure is not an HTTP error.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChannelTestResult"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/channels/{channelId}:
+    get:
+      operationId: getChannel
+      tags: [channels]
+      summary: One channel
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/ChannelId"
+      responses:
+        "200":
+          description: The channel.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Channel"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      operationId: updateChannel
+      tags: [channels]
+      summary: Change a channel
+      x-rowbird-authz: { role: admin, scope: admin }
+      parameters:
+        - $ref: "#/components/parameters/ChannelId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChannelPatch"
+      responses:
+        "200":
+          description: The channel.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Channel"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      operationId: deleteChannel
+      tags: [channels]
+      summary: Delete a channel that no delivery uses
+      x-rowbird-authz: { role: admin, scope: admin }
+      parameters:
+        - $ref: "#/components/parameters/ChannelId"
+      responses:
+        "204":
+          description: Deleted.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /api/v1/channels/{channelId}/test:
+    post:
+      operationId: testChannel
+      tags: [channels]
+      summary: Send a test message through a saved channel
+      description: Records the outcome as the channel's health.
+      x-rowbird-authz: { role: editor, scope: run }
+      parameters:
+        - $ref: "#/components/parameters/ChannelId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChannelTestRequest"
+      responses:
+        "200":
+          description: The outcome.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChannelTestResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/v1/channels/{channelId}/retry-failed:
+    post:
+      operationId: retryFailedDeliveries
+      tags: [channels]
+      summary: Send a channel's failed delivery attempts again
+      description: |
+        Queues the channel's failed attempts created since `since` (24 hours ago by default), at
+        most 100, and resends them in the background with each run's stored files.
+      x-rowbird-authz: { role: editor, scope: run }
+      parameters:
+        - $ref: "#/components/parameters/ChannelId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RetryFailedRequest"
+      responses:
+        "202":
+          description: How many attempts were queued.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RetryFailedResult"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/v1/links:
+    get:
+      operationId: listLinks
+      tags: [links]
+      summary: Shared links, newest first
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/Limit"
+        - $ref: "#/components/parameters/Cursor"
+        - name: run_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: active
+          in: query
+          required: false
+          description: Only links that are neither expired nor revoked.
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: A page of links.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedLinkPage"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /api/v1/links/{linkId}:
+    get:
+      operationId: getLink
+      tags: [links]
+      summary: One link with its latest downloads
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/LinkId"
+      responses:
+        "200":
+          description: The link.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedLinkDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/links/{linkId}/revoke:
+    post:
+      operationId: revokeLink
+      tags: [links]
+      summary: Revoke a link at once
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/LinkId"
+      responses:
+        "200":
+          description: The revoked link.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SharedLinkDetail"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  /api/v1/reports/{reportId}/deliveries:
+    get:
+      operationId: listDeliveries
+      tags: [reports]
+      summary: A report's deliveries, in order
+      x-rowbird-authz: { role: viewer, scope: read }
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      responses:
+        "200":
+          description: The deliveries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    post:
+      operationId: createDelivery
+      tags: [reports]
+      summary: Add a delivery to a report
+      description: |
+        The mode must be one the channel's destination supports; `link` needs `ROWBIRD_BASE_URL`.
+        `options` are validated by the destination's delivery schema (see `GET /plugins`).
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeliveryInput"
+      responses:
+        "201":
+          description: The delivery.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Delivery"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /api/v1/reports/{reportId}/deliveries/{deliveryId}:
+    put:
+      operationId: updateDelivery
+      tags: [reports]
+      summary: Replace a delivery's settings
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+        - $ref: "#/components/parameters/DeliveryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeliveryUpdate"
+      responses:
+        "200":
+          description: The delivery.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Delivery"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+    delete:
+      operationId: deleteDelivery
+      tags: [reports]
+      summary: Remove a delivery
+      x-rowbird-authz: { role: editor, scope: write }
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+        - $ref: "#/components/parameters/DeliveryId"
+      responses:
+        "204":
+          description: Removed; its past attempts stay on their runs.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/v1/deliveries/preview:
+    post:
+      operationId: previewDelivery
+      tags: [reports]
+      summary: Render a delivery's message without sending it
+      description: |
+        Uses the report's latest result (its first rows). Nothing is sent, no link is created and no
+        file is stored; attachments and links are shown by name.
+      x-rowbird-authz: { role: editor, scope: run }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeliveryPreviewRequest"
+      responses:
+        "200":
+          description: The rendered message.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliveryPreview"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /api/v1/reports/{reportId}/test-delivery:
+    post:
+      operationId: testDelivery
+      tags: [reports]
+      summary: Run the report now and deliver it only to the caller
+      description: |
+        Without `channel_id`, sends an email to the caller through the system mailer, with the
+        report's file formats. With it, delivers through the report's deliveries on that channel.
+        The run has trigger `test`, delivers even when the condition does not hold and never counts
+        toward failures.
+      x-rowbird-authz: { role: editor, scope: run }
+      parameters:
+        - $ref: "#/components/parameters/ReportId"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestDeliveryRequest"
+      responses:
+        "202":
+          description: The queued test run.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunSummary"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: rowbird_session
+      description: |
+        Browser session. State-changing requests must also send the `X-CSRF-Token` header
+        (see `csrfToken`).
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-Token
+      description: Double-submit CSRF token required with `sessionCookie` on state-changing requests.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: rbk_<random>
+      description: API key with scopes `read`, `run`, `write` or `admin`.
+
+  parameters:
+    DeliveryId:
+      name: deliveryId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    LinkId:
+      name: linkId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AttemptId:
+      name: attemptId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    NotificationId:
+      name: notificationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ChannelId:
+      name: channelId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ReportId:
+      name: reportId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    RunId:
+      name: runId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    QueryId:
+      name: queryId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ConnectionId:
+      name: connectionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    UserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SessionId:
+      name: sessionId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ApiKeyId:
+      name: apiKeyId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: Maximum number of items to return.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+        default: 50
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: Opaque cursor from a previous page's `next_cursor`.
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Makes a run or test request safe to retry for 24 hours.
+      schema:
+        type: string
+        maxLength: 255
+
+  responses:
+    SignedIn:
+      description: Signed in. Sets the `rowbird_session` and `rowbird_csrf` cookies.
+      headers:
+        Set-Cookie:
+          description: Session and CSRF cookies.
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Me"
+    TooManyRequests:
+      description: Too many attempts. Retry after the number of seconds in `Retry-After`.
+      headers:
+        Retry-After:
+          description: Seconds to wait before retrying.
+          schema:
+            type: integer
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Gone:
+      description: The resource existed but is no longer available.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Unprocessable:
+      description: The request is valid but the operation failed, for example the database refused the connection.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    BadRequest:
+      description: The request is invalid. `errors` lists the offending fields.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Unauthorized:
+      description: Authentication is required.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Forbidden:
+      description: The caller is authenticated but not allowed to do this.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: The resource does not exist.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Conflict:
+      description: The resource changed since it was read (`conflict.version`) or a unique value is taken.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    InternalError:
+      description: Unexpected server error.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+
+  schemas:
+    Problem:
+      type: object
+      description: RFC 9457 problem details, extended with a stable code and an i18n key.
+      required: [type, title, status, code, i18n_key]
+      properties:
+        type:
+          type: string
+          description: URI identifying the problem type, `https://rowbird.dev/errors/<code>`.
+          example: https://rowbird.dev/errors/connection.auth_failed
+        title:
+          type: string
+          description: Short human-readable summary in the request locale.
+          example: Authentication failed
+        status:
+          type: integer
+          description: HTTP status code.
+          example: 422
+        code:
+          type: string
+          description: Stable machine-readable error code.
+          example: connection.auth_failed
+        i18n_key:
+          type: string
+          description: Translation key clients can use to show their own message.
+          example: errors.connection.auth_failed
+        detail:
+          type: string
+          description: Human-readable explanation specific to this occurrence.
+        instance:
+          type: string
+          description: Request path that produced the problem.
+        request_id:
+          type: string
+          description: Id of the request, also sent in the `X-Request-ID` header.
+        errors:
+          type: array
+          description: Field-level validation errors.
+          items:
+            $ref: "#/components/schemas/FieldError"
+        dependents:
+          type: array
+          description: What uses the resource, for "in use" conflicts.
+          items:
+            $ref: "#/components/schemas/Dependent"
+    FieldError:
+      type: object
+      required: [field, code]
+      properties:
+        field:
+          type: string
+          description: Path of the offending field, for example `port` or `deliveries[0].mode`.
+          example: port
+        code:
+          type: string
+          description: Stable validation code.
+          example: validation.range
+    CursorPage:
+      type: object
+      description: |
+        Pagination envelope. List responses combine it with an `items` array through `allOf`.
+      properties:
+        next_cursor:
+          type: string
+          nullable: true
+          description: Cursor for the next page, or null on the last page.
+    SecretField:
+      type: object
+      description: Placeholder returned instead of a secret. Sending it back means "unchanged".
+      required: [configured]
+      properties:
+        configured:
+          type: boolean
+    Liveness:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+    Readiness:
+      type: object
+      required: [status, components]
+      properties:
+        status:
+          type: string
+          enum: [ok, unavailable]
+        components:
+          type: object
+          description: State of each component, keyed by component name.
+          additionalProperties:
+            $ref: "#/components/schemas/ComponentStatus"
+    ComponentStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok, error]
+        message:
+          type: string
+          description: Short explanation when the component is unhealthy. Never contains secrets.
+
+    Role:
+      type: string
+      enum: [viewer, editor, admin]
+    Scope:
+      type: string
+      enum: [read, run, write, admin]
+      description: API key scope. Each scope includes the ones before it.
+    Locale:
+      type: string
+      enum: [en, pt-BR]
+    Theme:
+      type: string
+      enum: [system, light, dark]
+    Restriction:
+      type: string
+      enum: [none, password_change_required, mfa_setup_required]
+      description: What the session must do before it can use the rest of the API.
+    SetupStatus:
+      type: object
+      required: [setup_required, token_required, master_key, passkeys_available, oidc_enabled, password_reset_available]
+      properties:
+        passkeys_available:
+          type: boolean
+          description: Passkeys can be used (they need ROWBIRD_BASE_URL).
+        password_reset_available:
+          type: boolean
+          description: The login page offers "forgot password" (a system mailer and ROWBIRD_BASE_URL exist).
+        oidc_enabled:
+          type: boolean
+          description: The login page offers single sign-on.
+        oidc_label:
+          type: string
+          description: The text of the single sign-on button, when set.
+        setup_required:
+          type: boolean
+        token_required:
+          type: boolean
+          description: The wizard must send the value of `ROWBIRD_SETUP_TOKEN`.
+        master_key:
+          $ref: "#/components/schemas/MasterKeyInfo"
+    MasterKeyInfo:
+      type: object
+      required: [source]
+      properties:
+        source:
+          type: string
+          enum: [env, file, generated]
+          description: |
+            Where the master key comes from. `generated` means Rowbird created it in the data
+            directory; it must be backed up because encrypted credentials cannot be recovered
+            without it.
+        path:
+          type: string
+          description: Location of the generated key file. Only present while setup is pending.
+    SetupRequest:
+      type: object
+      required: [email, name, password, locale, timezone]
+      properties:
+        token:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        password:
+          type: string
+          format: password
+        locale:
+          $ref: "#/components/schemas/Locale"
+        timezone:
+          type: string
+          description: IANA time zone, for example `America/Sao_Paulo`.
+    PasswordResetRequest:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+    PasswordResetConfirm:
+      type: object
+      required: [token, password]
+      properties:
+        token:
+          type: string
+          description: The `rbr_` token from the emailed link.
+        password:
+          type: string
+          format: password
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+          format: password
+    LoginResponse:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [authenticated, mfa_required]
+        challenge_token:
+          type: string
+          description: Present when `status` is `mfa_required`. Valid for 5 minutes.
+        methods:
+          type: array
+          description: Present when `status` is `mfa_required`; the second factors the account has.
+          items:
+            type: string
+            enum: [totp, passkey]
+        me:
+          $ref: "#/components/schemas/Me"
+    SecondFactorRequest:
+      type: object
+      required: [challenge_token]
+      description: Either `code` or `passkey`.
+      properties:
+        challenge_token:
+          type: string
+        code:
+          type: string
+          description: A six-digit TOTP code or a recovery code.
+        passkey:
+          type: object
+          additionalProperties: true
+          description: The answer of `navigator.credentials.get` to `beginPasskeySecondFactor`, as JSON.
+    ChallengeTokenRequest:
+      type: object
+      required: [challenge_token]
+      properties:
+        challenge_token:
+          type: string
+    PasskeyOptions:
+      type: object
+      required: [options]
+      properties:
+        options:
+          type: object
+          additionalProperties: true
+          description: WebAuthn options (the `publicKey` member), with binary values in base64url.
+    PasskeyCeremony:
+      type: object
+      required: [challenge_token, options]
+      properties:
+        challenge_token:
+          type: string
+          description: Ties the browser's answer to this ceremony. Valid for 5 minutes, once.
+        options:
+          type: object
+          additionalProperties: true
+          description: WebAuthn options (the `publicKey` member), with binary values in base64url.
+    PasskeyAnswer:
+      type: object
+      required: [challenge_token, credential]
+      properties:
+        challenge_token:
+          type: string
+        credential:
+          type: object
+          additionalProperties: true
+          description: The answer of `navigator.credentials.get`, as JSON.
+    PasskeyRegistration:
+      type: object
+      required: [challenge_token, credential]
+      properties:
+        challenge_token:
+          type: string
+        name:
+          type: string
+          maxLength: 100
+          description: A name to recognize the passkey by ("Work laptop"); "Passkey" when empty.
+        credential:
+          type: object
+          additionalProperties: true
+          description: The answer of `navigator.credentials.create`, as JSON.
+    PasskeyRename:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 100
+    OptionalPassword:
+      type: object
+      properties:
+        password:
+          type: string
+          format: password
+          description: The current password; required for accounts that have one.
+    Passkey:
+      type: object
+      required: [id, name, created_at, last_used_at, synced]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        last_used_at:
+          type: string
+          format: date-time
+          nullable: true
+        synced:
+          type: boolean
+          description: The passkey can be synced between devices (backup eligible).
+    PasskeyList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Passkey"
+    Me:
+      type: object
+      required: [id, email, name, locale, theme, role, totp_enabled, has_password, restriction, version, created_at]
+      properties:
+        has_password:
+          type: boolean
+          description: False for accounts that only sign in through OIDC; they skip password confirmations.
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        name:
+          type: string
+        locale:
+          $ref: "#/components/schemas/Locale"
+        theme:
+          $ref: "#/components/schemas/Theme"
+        role:
+          $ref: "#/components/schemas/Role"
+        totp_enabled:
+          type: boolean
+        restriction:
+          $ref: "#/components/schemas/Restriction"
+        last_login_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          format: int64
+    MePatch:
+      type: object
+      required: [version]
+      properties:
+        version:
+          type: integer
+          format: int64
+        name:
+          type: string
+        locale:
+          $ref: "#/components/schemas/Locale"
+        theme:
+          $ref: "#/components/schemas/Theme"
+    PasswordChange:
+      type: object
+      required: [current_password, new_password]
+      properties:
+        current_password:
+          type: string
+          format: password
+        new_password:
+          type: string
+          format: password
+    PasswordConfirmation:
+      type: object
+      required: [password]
+      properties:
+        password:
+          type: string
+          format: password
+    CodeRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+    Session:
+      type: object
+      required: [id, ip, user_agent, created_at, last_seen_at, expires_at, current]
+      properties:
+        id:
+          type: string
+          format: uuid
+        ip:
+          type: string
+        user_agent:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        last_seen_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        current:
+          type: boolean
+          description: True for the session making this request.
+    SessionList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Session"
+    TotpSetup:
+      type: object
+      required: [secret, otpauth_url, qr_code]
+      properties:
+        secret:
+          type: string
+          description: Base32 secret for manual entry.
+        otpauth_url:
+          type: string
+        qr_code:
+          type: string
+          description: PNG data URL of the `otpauth_url` QR code.
+    RecoveryCodes:
+      type: object
+      required: [codes]
+      properties:
+        codes:
+          type: array
+          items:
+            type: string
+    User:
+      type: object
+      required: [id, email, name, role, locale, disabled, locked, totp_enabled, must_change_password, created_at, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+        locale:
+          $ref: "#/components/schemas/Locale"
+        disabled:
+          type: boolean
+        locked:
+          type: boolean
+          description: Temporarily locked after repeated failed sign-ins.
+        totp_enabled:
+          type: boolean
+        must_change_password:
+          type: boolean
+        last_login_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          format: int64
+    UserPage:
+      allOf:
+        - $ref: "#/components/schemas/CursorPage"
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/User"
+    UserCreate:
+      type: object
+      required: [email, name, role]
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+        locale:
+          $ref: "#/components/schemas/Locale"
+    UserCreated:
+      type: object
+      required: [user, temporary_password]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        temporary_password:
+          type: string
+          description: Shown once. The user must change it at the first sign-in.
+    UserPatch:
+      type: object
+      required: [version]
+      properties:
+        version:
+          type: integer
+          format: int64
+        name:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+        disabled:
+          type: boolean
+    TemporaryPassword:
+      type: object
+      required: [temporary_password]
+      properties:
+        temporary_password:
+          type: string
+    ApiKey:
+      type: object
+      required: [id, name, prefix, scopes, created_at, active]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        prefix:
+          type: string
+          description: First characters after `rbk_`, to recognize the key.
+        scopes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Scope"
+        active:
+          type: boolean
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_used_at:
+          type: string
+          format: date-time
+          nullable: true
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+          format: uuid
+          nullable: true
+    ApiKeyPage:
+      allOf:
+        - $ref: "#/components/schemas/CursorPage"
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/ApiKey"
+    ApiKeyCreate:
+      type: object
+      required: [name, scopes]
+      properties:
+        name:
+          type: string
+        scopes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Scope"
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+    ApiKeyCreated:
+      type: object
+      required: [api_key, key]
+      properties:
+        api_key:
+          $ref: "#/components/schemas/ApiKey"
+        key:
+          type: string
+          description: The key, `rbk_` followed by 43 characters. Shown once.
+    Settings:
+      type: object
+      required: [default_locale, default_timezone, require_2fa, links_enabled, retention_runs_days, retention_artifacts_days, update_check]
+      properties:
+        links_enabled:
+          type: boolean
+          readOnly: true
+          description: Whether ROWBIRD_BASE_URL is set; without it deliveries cannot share links.
+        default_locale:
+          $ref: "#/components/schemas/Locale"
+        default_timezone:
+          type: string
+        require_2fa:
+          type: boolean
+        retention_runs_days:
+          type: integer
+          minimum: 1
+          maximum: 3650
+          description: Runs older than this, with their attempts, links and files, are deleted by the daily retention job.
+        retention_artifacts_days:
+          type: integer
+          minimum: 1
+          maximum: 3650
+          description: Run files older than this are deleted; their links then answer 410 Gone.
+        update_check:
+          type: boolean
+          description: Whether this workspace allows the daily check for new Rowbird releases.
+    SettingsPatch:
+      type: object
+      properties:
+        default_locale:
+          $ref: "#/components/schemas/Locale"
+        default_timezone:
+          type: string
+        require_2fa:
+          type: boolean
+        retention_runs_days:
+          type: integer
+          minimum: 1
+          maximum: 3650
+          description: Runs older than this, with their attempts, links and files, are deleted by the daily retention job.
+        retention_artifacts_days:
+          type: integer
+          minimum: 1
+          maximum: 3650
+          description: Run files older than this are deleted; their links then answer 410 Gone.
+        update_check:
+          type: boolean
+          description: Whether this workspace allows the daily check for new Rowbird releases.
+    About:
+      type: object
+      required: [version, commit, build_date, go_version, platform, update_check_allowed, update_check_enabled, update_available]
+      properties:
+        version:
+          type: string
+        commit:
+          type: string
+        build_date:
+          type: string
+        go_version:
+          type: string
+        platform:
+          type: string
+        update_check_allowed:
+          type: boolean
+          description: False when ROWBIRD_UPDATE_CHECK turned the check off on the server.
+        update_check_enabled:
+          type: boolean
+          description: The workspace setting (Settings update_check).
+        latest_version:
+          type: string
+          description: The latest release, once a check has succeeded.
+        release_url:
+          type: string
+        checked_at:
+          type: string
+          format: date-time
+          nullable: true
+        update_available:
+          type: boolean
+    StorageStatus:
+      type: object
+      required: [backend, artifact_bytes, retention_last_run_at, backup]
+      properties:
+        backend:
+          type: string
+          enum: [local, s3]
+        artifact_bytes:
+          type: integer
+          format: int64
+          description: Size of the stored run files, across the instance.
+        retention_last_run_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the daily retention job last finished; null before its first run.
+        backup:
+          $ref: "#/components/schemas/BackupStatus"
+    BackupStatus:
+      type: object
+      description: Scheduled backups, configured with ROWBIRD_BACKUP_* on the server.
+      required: [available, enabled]
+      properties:
+        available:
+          type: boolean
+          description: False with a Postgres store, which is backed up with pg_dump.
+        enabled:
+          type: boolean
+        schedule:
+          type: string
+          description: The cron expression, in UTC.
+        destination:
+          type: string
+          enum: [local, s3]
+        keep:
+          type: integer
+        last_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_file:
+          type: string
+        last_size_bytes:
+          type: integer
+          format: int64
+        last_error:
+          type: string
+          description: Why the latest scheduled backup failed; empty when it succeeded.
+        next_at:
+          type: string
+          format: date-time
+          nullable: true
+    AlertTarget:
+      type: object
+      required: [channel_id, options]
+      properties:
+        channel_id:
+          type: string
+          format: uuid
+        options:
+          type: object
+          additionalProperties: true
+          description: Options for the channel's destination, as in a delivery (recipients, chat, channel).
+    AlertSettings:
+      type: object
+      required: [primary, fallback, heartbeat_url_configured, heartbeat_interval_seconds, same_destination]
+      properties:
+        primary:
+          allOf:
+            - $ref: "#/components/schemas/AlertTarget"
+          nullable: true
+        fallback:
+          allOf:
+            - $ref: "#/components/schemas/AlertTarget"
+          nullable: true
+        heartbeat_url_configured:
+          type: boolean
+        heartbeat_interval_seconds:
+          type: integer
+        same_destination:
+          type: boolean
+          description: Primary and fallback have the same type, so one outage can take both down.
+    AlertSettingsInput:
+      type: object
+      properties:
+        primary:
+          allOf:
+            - $ref: "#/components/schemas/AlertTarget"
+          nullable: true
+        fallback:
+          allOf:
+            - $ref: "#/components/schemas/AlertTarget"
+          nullable: true
+        heartbeat_url:
+          type: string
+          description: An absolute http(s) URL called with GET; empty removes it, absent keeps it.
+        heartbeat_interval_seconds:
+          type: integer
+          minimum: 30
+          maximum: 86400
+          description: Default 60.
+    SecurityEvent:
+      type: object
+      required: [id, type, ip, meta, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          example: login_failed
+        actor_user_id:
+          type: string
+          format: uuid
+          nullable: true
+        ip:
+          type: string
+        meta:
+          type: object
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+    SecurityEventPage:
+      allOf:
+        - $ref: "#/components/schemas/CursorPage"
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/SecurityEvent"
+
+    PluginCatalog:
+      type: object
+      required: [plugins, messages]
+      properties:
+        plugins:
+          type: array
+          items:
+            $ref: "#/components/schemas/PluginInfo"
+        messages:
+          type: object
+          description: Locale to translation key to text, for every label used by the plugins.
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: string
+    PluginInfo:
+      type: object
+      required: [kind, id, name, description, icon, version, schema, capabilities]
+      properties:
+        kind:
+          type: string
+          enum: [connector, formatter, condition, destination, ai_provider, storage]
+        id:
+          type: string
+        name:
+          type: string
+          description: Translation key.
+        description:
+          type: string
+          description: Translation key.
+        icon:
+          type: string
+        version:
+          type: string
+        schema:
+          type: object
+          additionalProperties: true
+          description: Configuration schema (JSON Schema subset with x- extensions).
+        capabilities:
+          type: object
+          additionalProperties: true
+        delivery_schema:
+          type: object
+          additionalProperties: true
+          description: For destinations, the schema of each delivery's options (recipients, templates, paths).
+    ConnectionStatus:
+      type: string
+      enum: [unknown, ok, error]
+    Connection:
+      type: object
+      required: [id, name, managed_by, driver, config, query_timeout_seconds, max_rows, allow_multi_statement, ai_excluded_tables, status, server_version, last_error, created_at, updated_at, version]
+      properties:
+        managed_by:
+          $ref: "#/components/schemas/ManagedBy"
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Unique slug-like name, used to reference the connection in YAML.
+        driver:
+          type: string
+          description: Connector plugin id.
+        config:
+          type: object
+          additionalProperties: true
+          description: 'Settings. Secret fields appear as `{ "configured": true|false }`.'
+        query_timeout_seconds:
+          type: integer
+        max_rows:
+          type: integer
+        allow_multi_statement:
+          type: boolean
+        ai_excluded_tables:
+          type: array
+          items:
+            type: string
+        has_write_permission:
+          type: boolean
+          nullable: true
+          description: From the last check; null when unknown.
+        status:
+          $ref: "#/components/schemas/ConnectionStatus"
+        server_version:
+          type: string
+        last_checked_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_error:
+          type: string
+          description: Error code of the last failed check, empty when it succeeded.
+        schema_cached_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          format: int64
+    ConnectionList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Connection"
+    ConnectionCreate:
+      type: object
+      required: [name, driver, config]
+      properties:
+        name:
+          type: string
+        driver:
+          type: string
+        config:
+          type: object
+          additionalProperties: true
+        query_timeout_seconds:
+          type: integer
+        max_rows:
+          type: integer
+        allow_multi_statement:
+          type: boolean
+        ai_excluded_tables:
+          type: array
+          items:
+            type: string
+    ConnectionPatch:
+      type: object
+      required: [version]
+      properties:
+        version:
+          type: integer
+          format: int64
+        name:
+          type: string
+        config:
+          type: object
+          additionalProperties: true
+        query_timeout_seconds:
+          type: integer
+        max_rows:
+          type: integer
+        allow_multi_statement:
+          type: boolean
+        ai_excluded_tables:
+          type: array
+          items:
+            type: string
+    ConnectionTest:
+      type: object
+      required: [driver, config]
+      properties:
+        connection_id:
+          type: string
+          format: uuid
+        driver:
+          type: string
+        config:
+          type: object
+          additionalProperties: true
+    ConnectionTestResult:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+        latency_ms:
+          type: integer
+          format: int64
+        server_version:
+          type: string
+        can_write:
+          type: boolean
+          nullable: true
+          description: The user can modify data; Rowbird recommends a read-only user.
+        error_code:
+          type: string
+          example: connection.auth_failed
+        error_detail:
+          type: object
+          additionalProperties:
+            type: string
+          description: Safe details, for example the SSH host key `fingerprint` to confirm.
+        tables:
+          type: integer
+          description: Number of tables and views found.
+    DatabaseSchema:
+      type: object
+      required: [tables]
+      properties:
+        cached_at:
+          type: string
+          format: date-time
+          nullable: true
+        tables:
+          type: array
+          items:
+            $ref: "#/components/schemas/DatabaseTable"
+    DatabaseTable:
+      type: object
+      required: [name, kind, columns]
+      properties:
+        schema:
+          type: string
+        name:
+          type: string
+        kind:
+          type: string
+          enum: [table, view]
+        comment:
+          type: string
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/DatabaseColumn"
+    DatabaseColumn:
+      type: object
+      required: [name, type, db_type, nullable]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [text, integer, decimal, float, boolean, date, datetime, time, json, binary, unknown]
+        db_type:
+          type: string
+        nullable:
+          type: boolean
+        comment:
+          type: string
+
+    Dependent:
+      type: object
+      required: [type, id, name]
+      properties:
+        type:
+          type: string
+          example: query
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+    ParamType:
+      type: string
+      enum: [text, integer, decimal, boolean, date, datetime]
+    QueryParam:
+      type: object
+      required: [name, type]
+      properties:
+        name:
+          type: string
+          example: region
+        type:
+          $ref: "#/components/schemas/ParamType"
+        default:
+          type: string
+          nullable: true
+          description: 'Text form: integers, decimals with a dot, true/false, 2006-01-02, 2006-01-02T15:04.'
+    QueryVersionInfo:
+      type: object
+      required: [number, note, created_at, author_name]
+      properties:
+        number:
+          type: integer
+        note:
+          type: string
+        restored_from:
+          type: integer
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        author_name:
+          type: string
+    QueryVersion:
+      allOf:
+        - $ref: "#/components/schemas/QueryVersionInfo"
+        - type: object
+          required: [sql, params]
+          properties:
+            sql:
+              type: string
+            params:
+              type: array
+              items:
+                $ref: "#/components/schemas/QueryParam"
+    QueryVersionList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/QueryVersionInfo"
+    QuerySummary:
+      type: object
+      required: [id, managed_by, title, slug, description, connection_id, connection_name, driver, current_version, author_name, report_count, updated_at]
+      properties:
+        managed_by:
+          $ref: "#/components/schemas/ManagedBy"
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        connection_id:
+          type: string
+          format: uuid
+        connection_name:
+          type: string
+        driver:
+          type: string
+        current_version:
+          type: integer
+        author_name:
+          type: string
+          description: Who created the current version.
+        report_count:
+          type: integer
+          description: Reports that use the query.
+        updated_at:
+          type: string
+          format: date-time
+    QueryList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/QuerySummary"
+    Query:
+      allOf:
+        - $ref: "#/components/schemas/QuerySummary"
+        - type: object
+          required: [sql, params, current, version, created_at]
+          properties:
+            sql:
+              type: string
+            params:
+              type: array
+              items:
+                $ref: "#/components/schemas/QueryParam"
+            current:
+              $ref: "#/components/schemas/QueryVersionInfo"
+            created_at:
+              type: string
+              format: date-time
+            version:
+              type: integer
+              format: int64
+    QueryCreate:
+      type: object
+      required: [title, connection_id, sql]
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        connection_id:
+          type: string
+          format: uuid
+        sql:
+          type: string
+        params:
+          type: array
+          items:
+            $ref: "#/components/schemas/QueryParam"
+        note:
+          type: string
+    QueryPatch:
+      type: object
+      required: [version]
+      properties:
+        version:
+          type: integer
+          format: int64
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        connection_id:
+          type: string
+          format: uuid
+        sql:
+          type: string
+        params:
+          type: array
+          items:
+            $ref: "#/components/schemas/QueryParam"
+        note:
+          type: string
+          description: Describes the new version, when one is created.
+    QueryRestore:
+      type: object
+      required: [number, version]
+      properties:
+        number:
+          type: integer
+          minimum: 1
+        version:
+          type: integer
+          format: int64
+          description: Current version of the query (optimistic concurrency).
+    PreviewRequest:
+      type: object
+      required: [connection_id, sql]
+      properties:
+        connection_id:
+          type: string
+          format: uuid
+        sql:
+          type: string
+        params:
+          type: array
+          items:
+            $ref: "#/components/schemas/QueryParam"
+        values:
+          type: object
+          additionalProperties:
+            type: string
+          description: Parameter values in text form; defaults apply to missing ones.
+        timezone:
+          type: string
+          description: IANA time zone for built-in dates, usually the browser's.
+        limit:
+          type: integer
+          minimum: 0
+          maximum: 1000
+          description: Row cap; 0 or missing means 100. Never above the connection's max_rows.
+    ResultColumn:
+      type: object
+      required: [name, type, db_type]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [text, integer, decimal, float, boolean, date, datetime, time, json, binary, unknown]
+        db_type:
+          type: string
+        with_time_zone:
+          type: boolean
+    ResolvedParam:
+      type: object
+      required: [name, type, value, builtin]
+      properties:
+        name:
+          type: string
+        type:
+          $ref: "#/components/schemas/ParamType"
+        value:
+          type: string
+        builtin:
+          type: boolean
+    PreviewResult:
+      type: object
+      required: [columns, rows, truncated, duration_ms, params, timezone]
+      properties:
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResultColumn"
+        rows:
+          type: array
+          items:
+            type: array
+            items: {}
+        truncated:
+          type: boolean
+          description: More rows existed beyond the cap.
+        duration_ms:
+          type: integer
+          format: int64
+        params:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResolvedParam"
+        timezone:
+          type: string
+
+    ConditionRule:
+      type: object
+      required: [type]
+      description: A condition plugin id and that plugin's parameters (see `GET /plugins`, kind `condition`).
+      properties:
+        type:
+          type: string
+          example: row_count
+      additionalProperties: true
+    Condition:
+      type: object
+      required: [match, rules]
+      description: Rules combined with `all` or `any`. No rules means the report always delivers.
+      properties:
+        match:
+          type: string
+          enum: [all, any]
+        rules:
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/ConditionRule"
+    ReportStatus:
+      type: string
+      enum: [active, paused, failing]
+    PausedReason:
+      type: string
+      enum: [manual, auto_failures, gitops_orphan]
+    ManagedBy:
+      type: string
+      enum: ["", gitops, gitops_detached]
+      description: |
+        Who manages the resource: empty for the UI and the API, `gitops` for the configuration
+        directory (read only: changes answer `409 resource.managed_by_gitops`), `gitops_detached`
+        for one an admin detached (the directory leaves it alone).
+    MisfirePolicy:
+      type: string
+      enum: [run_once, skip]
+    OverlapPolicy:
+      type: string
+      enum: [skip, queue]
+    ReportSummary:
+      type: object
+      required: [id, managed_by, gitops_orphan, title, slug, description, query_id, query_title, enabled, status, cron, timezone, next_run_at, paused_reason, consecutive_failures, last_run, updated_at]
+      properties:
+        gitops_orphan:
+          type: boolean
+          description: A GitOps report whose document left the configuration directory; paused until it returns.
+        managed_by:
+          $ref: "#/components/schemas/ManagedBy"
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        query_id:
+          type: string
+          format: uuid
+        query_title:
+          type: string
+        enabled:
+          type: boolean
+        status:
+          $ref: "#/components/schemas/ReportStatus"
+        cron:
+          type: string
+        timezone:
+          type: string
+        next_run_at:
+          type: string
+          format: date-time
+          nullable: true
+        paused_reason:
+          allOf:
+            - $ref: "#/components/schemas/PausedReason"
+          nullable: true
+        consecutive_failures:
+          type: integer
+        last_run:
+          allOf:
+            - $ref: "#/components/schemas/RunSummary"
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+    ReportList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ReportSummary"
+    Report:
+      allOf:
+        - $ref: "#/components/schemas/ReportSummary"
+        - type: object
+          required: [condition, param_overrides, max_rows, retry_max, retry_backoff_seconds, misfire_policy, overlap_policy, auto_pause_after, notify_owner_on_failure, created_at, version]
+          properties:
+            condition:
+              $ref: "#/components/schemas/Condition"
+            param_overrides:
+              type: object
+              additionalProperties:
+                type: string
+            max_rows:
+              type: integer
+              nullable: true
+              description: Row limit for this report; null uses the connection's.
+            retry_max:
+              type: integer
+            retry_backoff_seconds:
+              type: integer
+            misfire_policy:
+              $ref: "#/components/schemas/MisfirePolicy"
+            overlap_policy:
+              $ref: "#/components/schemas/OverlapPolicy"
+            auto_pause_after:
+              type: integer
+              description: Consecutive failed runs that pause the report; 0 never pauses.
+            notify_owner_on_failure:
+              type: boolean
+            created_at:
+              type: string
+              format: date-time
+            version:
+              type: integer
+              format: int64
+    ReportCreate:
+      type: object
+      required: [title, query_id, cron]
+      properties:
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        query_id:
+          type: string
+          format: uuid
+        enabled:
+          type: boolean
+          default: true
+        cron:
+          type: string
+          example: "0 7 * * 1-5"
+        timezone:
+          type: string
+          description: IANA time zone; the workspace default when omitted.
+        condition:
+          $ref: "#/components/schemas/Condition"
+        param_overrides:
+          type: object
+          additionalProperties:
+            type: string
+        max_rows:
+          type: integer
+          minimum: 0
+          description: 0 or missing uses the connection's limit.
+        retry_max:
+          type: integer
+          minimum: 0
+          maximum: 10
+          default: 2
+        retry_backoff_seconds:
+          type: integer
+          minimum: 1
+          maximum: 3600
+          default: 30
+        misfire_policy:
+          $ref: "#/components/schemas/MisfirePolicy"
+        overlap_policy:
+          $ref: "#/components/schemas/OverlapPolicy"
+        auto_pause_after:
+          type: integer
+          minimum: 0
+          maximum: 100
+          default: 5
+        notify_owner_on_failure:
+          type: boolean
+          default: true
+    ReportPatch:
+      type: object
+      required: [version]
+      properties:
+        version:
+          type: integer
+          format: int64
+        title:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        query_id:
+          type: string
+          format: uuid
+        cron:
+          type: string
+        timezone:
+          type: string
+        condition:
+          $ref: "#/components/schemas/Condition"
+        param_overrides:
+          type: object
+          additionalProperties:
+            type: string
+        max_rows:
+          type: integer
+          minimum: 0
+          description: 0 removes the report's limit and uses the connection's.
+        retry_max:
+          type: integer
+        retry_backoff_seconds:
+          type: integer
+        misfire_policy:
+          $ref: "#/components/schemas/MisfirePolicy"
+        overlap_policy:
+          $ref: "#/components/schemas/OverlapPolicy"
+        auto_pause_after:
+          type: integer
+        notify_owner_on_failure:
+          type: boolean
+    ScheduleRequest:
+      type: object
+      required: [cron]
+      properties:
+        cron:
+          type: string
+        timezone:
+          type: string
+          description: IANA time zone; the workspace default when omitted.
+        count:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 5
+        locale:
+          type: string
+          description: Language of the description (`en` or `pt-BR`).
+          default: en
+    SchedulePreview:
+      type: object
+      required: [expression, timezone, description, next]
+      properties:
+        expression:
+          type: string
+          description: The normalized expression.
+        timezone:
+          type: string
+        description:
+          type: string
+          description: Human description; empty when the expression cannot be described.
+        next:
+          type: array
+          items:
+            type: string
+            format: date-time
+    RunStatus:
+      type: string
+      enum: [pending, running, success, partial, skipped, failed, cancelled]
+    RunTrigger:
+      type: string
+      enum: [schedule, manual, test, retry]
+    RunRequest:
+      type: object
+      properties:
+        deliver:
+          type: boolean
+          default: true
+          description: False only shows the result.
+    RunSummary:
+      type: object
+      required: [id, report_id, report_title, trigger, triggered_by_name, deliver, status, scheduled_for, started_at, finished_at, duration_ms, row_count, truncated, attempt, error_code, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        report_id:
+          type: string
+          format: uuid
+        report_title:
+          type: string
+        trigger:
+          $ref: "#/components/schemas/RunTrigger"
+        triggered_by_name:
+          type: string
+          nullable: true
+        deliver:
+          type: boolean
+        status:
+          $ref: "#/components/schemas/RunStatus"
+        scheduled_for:
+          type: string
+          format: date-time
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        finished_at:
+          type: string
+          format: date-time
+          nullable: true
+        duration_ms:
+          type: integer
+          format: int64
+          nullable: true
+        row_count:
+          type: integer
+          format: int64
+          nullable: true
+        truncated:
+          type: boolean
+        attempt:
+          type: integer
+        error_code:
+          type: string
+          nullable: true
+          description: Why the run failed, was skipped or cancelled (`run.condition_false`, `connection.auth_failed`, ...).
+        created_at:
+          type: string
+          format: date-time
+    RunPage:
+      allOf:
+        - $ref: "#/components/schemas/CursorPage"
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/RunSummary"
+    RuleResult:
+      type: object
+      required: [type, passed]
+      properties:
+        type:
+          type: string
+        passed:
+          type: boolean
+        detail:
+          type: object
+          additionalProperties: true
+    ConditionResult:
+      type: object
+      required: [passed, match, rules]
+      properties:
+        passed:
+          type: boolean
+        match:
+          type: string
+        rules:
+          type: array
+          items:
+            $ref: "#/components/schemas/RuleResult"
+    RunParams:
+      type: object
+      required: [timezone, values]
+      properties:
+        timezone:
+          type: string
+        values:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResolvedParam"
+    RunQuery:
+      type: object
+      required: [query_id, version, sql]
+      description: The query version the run executed.
+      properties:
+        query_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+        sql:
+          type: string
+    RunSample:
+      type: object
+      required: [columns, rows]
+      description: The first rows of the result (at most 100), encoded like the preview.
+      properties:
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResultColumn"
+        rows:
+          type: array
+          items:
+            type: array
+            items: {}
+    Run:
+      allOf:
+        - $ref: "#/components/schemas/RunSummary"
+        - type: object
+          required: [error_message, query, params, condition, sample, cancel_requested_at, result_expires_at, deliveries, files]
+          properties:
+            files:
+              type: array
+              description: The files the run's deliveries generated, downloadable until they expire.
+              items:
+                $ref: "#/components/schemas/RunFile"
+            deliveries:
+              type: array
+              description: One attempt per delivery the run sent (or tried to send).
+              items:
+                $ref: "#/components/schemas/DeliveryAttempt"
+            error_message:
+              type: string
+              nullable: true
+              description: The database's message, with the connection's secrets removed.
+            query:
+              allOf:
+                - $ref: "#/components/schemas/RunQuery"
+              nullable: true
+            params:
+              allOf:
+                - $ref: "#/components/schemas/RunParams"
+              nullable: true
+            condition:
+              allOf:
+                - $ref: "#/components/schemas/ConditionResult"
+              nullable: true
+            sample:
+              allOf:
+                - $ref: "#/components/schemas/RunSample"
+              nullable: true
+            cancel_requested_at:
+              type: string
+              format: date-time
+              nullable: true
+            result_expires_at:
+              type: string
+              format: date-time
+              nullable: true
+              description: Until when the result can be downloaded; null when it cannot.
+
+    ChannelStatus:
+      type: string
+      enum: [unknown, ok, failing]
+    Channel:
+      type: object
+      required: [id, name, managed_by, type, config, capabilities, status, is_system_mailer, used_by, created_at, updated_at, version]
+      properties:
+        managed_by:
+          $ref: "#/components/schemas/ManagedBy"
+        capabilities:
+          type: object
+          additionalProperties: true
+          description: The destination's capabilities with this channel's settings (modes, attachment limit, inline target).
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          description: Unique slug-like name, used to reference the channel in YAML.
+        type:
+          type: string
+          description: Destination plugin id.
+        config:
+          type: object
+          additionalProperties: true
+          description: 'Settings. Secret fields appear as `{ "configured": true|false }`.'
+        status:
+          $ref: "#/components/schemas/ChannelStatus"
+        last_success_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_failure_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_error:
+          type: string
+          nullable: true
+          description: The last failure, with the channel's secrets removed.
+        is_system_mailer:
+          type: boolean
+          description: Sends system mail (password resets, "send test to me"). One email channel at most.
+        used_by:
+          type: array
+          items:
+            $ref: "#/components/schemas/Dependent"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        version:
+          type: integer
+          format: int64
+    ChannelList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Channel"
+    ChannelCreate:
+      type: object
+      required: [name, type, config]
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+        config:
+          type: object
+          additionalProperties: true
+        is_system_mailer:
+          type: boolean
+    ChannelPatch:
+      type: object
+      required: [version]
+      properties:
+        version:
+          type: integer
+          format: int64
+        name:
+          type: string
+        config:
+          type: object
+          additionalProperties: true
+          description: Replaces the settings; secrets follow the placeholder rules.
+        is_system_mailer:
+          type: boolean
+    ChannelTest:
+      type: object
+      required: [type, config]
+      properties:
+        channel_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+        config:
+          type: object
+          additionalProperties: true
+        to:
+          type: string
+          description: Where an email channel sends the test message.
+    ChannelTestRequest:
+      type: object
+      properties:
+        to:
+          type: string
+          description: Where an email channel sends the test message; the caller's address by default.
+    ChannelTestResult:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+        error_code:
+          type: string
+          example: delivery.auth_failed
+        error_message:
+          type: string
+          description: What the service answered, with the channel's secrets removed.
+
+    SharedLink:
+      type: object
+      required: [id, run_id, report_id, report_title, file_name, format, status, expires_at, require_login, download_count, created_at]
+      description: A shared link. Its token is shown only in the message that carried it.
+      properties:
+        id:
+          type: string
+          format: uuid
+        run_id:
+          type: string
+          format: uuid
+        report_id:
+          type: string
+          format: uuid
+        report_title:
+          type: string
+        delivery_id:
+          type: string
+          format: uuid
+          nullable: true
+        file_name:
+          type: string
+        format:
+          type: string
+        status:
+          type: string
+          enum: [active, expired, revoked]
+        expires_at:
+          type: string
+          format: date-time
+        require_login:
+          type: boolean
+        revoked_at:
+          type: string
+          format: date-time
+          nullable: true
+        revoked_by_name:
+          type: string
+          nullable: true
+        download_count:
+          type: integer
+        last_download_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+    NotificationSeverity:
+      type: string
+      enum: [info, warning, error]
+    Notification:
+      type: object
+      required: [id, type, severity, title_key, params, entity_type, entity_id, count, first_at, last_at, read_at, resolved_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          description: channel_failing, channel_recovered, report_failing, report_recovered or report_paused.
+        severity:
+          $ref: "#/components/schemas/NotificationSeverity"
+        title_key:
+          type: string
+        params:
+          type: object
+          additionalProperties: true
+        entity_type:
+          type: string
+          description: What the notification is about (`channel`, `report`), empty for none.
+        entity_id:
+          type: string
+          format: uuid
+          nullable: true
+        count:
+          type: integer
+          description: How many times it happened while the notification was open.
+        first_at:
+          type: string
+          format: date-time
+        last_at:
+          type: string
+          format: date-time
+        read_at:
+          type: string
+          format: date-time
+          nullable: true
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: When the problem ended; notices such as recoveries are resolved from the start.
+    NotificationPage:
+      allOf:
+        - $ref: "#/components/schemas/CursorPage"
+        - type: object
+          required: [items, unread_count]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/Notification"
+            unread_count:
+              type: integer
+    MarkedCount:
+      type: object
+      required: [marked]
+      properties:
+        marked:
+          type: integer
+    SuccessRate:
+      type: object
+      required: [succeeded, total]
+      properties:
+        succeeded:
+          type: integer
+        total:
+          type: integer
+    DashboardReport:
+      type: object
+      required: [id, title, next_run_at, timezone, consecutive_failures, paused_reason]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        next_run_at:
+          type: string
+          format: date-time
+          nullable: true
+        timezone:
+          type: string
+        consecutive_failures:
+          type: integer
+        paused_reason:
+          type: string
+          nullable: true
+    DashboardChannel:
+      type: object
+      required: [id, name, type, last_error, last_failure_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        type:
+          type: string
+        last_error:
+          type: string
+          nullable: true
+        last_failure_at:
+          type: string
+          format: date-time
+          nullable: true
+    Dashboard:
+      type: object
+      required: [next_runs, recent_failures, success_rate_7d, success_rate_30d, failing_channels, failing_reports, onboarding]
+      properties:
+        onboarding:
+          $ref: "#/components/schemas/Onboarding"
+        next_runs:
+          type: array
+          items:
+            $ref: "#/components/schemas/DashboardReport"
+        recent_failures:
+          type: array
+          items:
+            $ref: "#/components/schemas/RunSummary"
+        success_rate_7d:
+          $ref: "#/components/schemas/SuccessRate"
+        success_rate_30d:
+          $ref: "#/components/schemas/SuccessRate"
+        failing_channels:
+          type: array
+          items:
+            $ref: "#/components/schemas/DashboardChannel"
+        failing_reports:
+          type: array
+          items:
+            $ref: "#/components/schemas/DashboardReport"
+    Onboarding:
+      type: object
+      description: The first-use checklist on the home page.
+      required: [has_connection, has_query, has_report, has_delivery]
+      properties:
+        has_connection:
+          type: boolean
+        has_query:
+          type: boolean
+        has_report:
+          type: boolean
+        has_delivery:
+          type: boolean
+          description: A delivery of the workspace was sent successfully.
+    SharedLinkPage:
+      allOf:
+        - $ref: "#/components/schemas/CursorPage"
+        - type: object
+          required: [items]
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/SharedLink"
+    LinkDownload:
+      type: object
+      required: [at, ip, user_agent]
+      properties:
+        at:
+          type: string
+          format: date-time
+        ip:
+          type: string
+        user_agent:
+          type: string
+        user_id:
+          type: string
+          format: uuid
+          nullable: true
+        user_name:
+          type: string
+          nullable: true
+          description: The name of the signed-in user who downloaded, when there was one.
+    SharedLinkDetail:
+      allOf:
+        - $ref: "#/components/schemas/SharedLink"
+        - type: object
+          required: [downloads]
+          properties:
+            downloads:
+              type: array
+              items:
+                $ref: "#/components/schemas/LinkDownload"
+
+    DeliveryMode:
+      type: string
+      enum: [inline, attachment, link]
+    DeliveryInput:
+      type: object
+      required: [channel_id]
+      properties:
+        channel_id:
+          type: string
+          format: uuid
+        enabled:
+          type: boolean
+          default: true
+        mode:
+          $ref: "#/components/schemas/DeliveryMode"
+        formats:
+          type: array
+          items:
+            type: string
+          description: File formats for attachment and link modes (csv, xlsx, json, pdf).
+        inline_row_limit:
+          type: integer
+          minimum: 1
+          maximum: 200
+          default: 20
+        include_inline_with_files:
+          type: boolean
+          default: true
+          description: Also show the first rows in the message when files are attached or linked.
+        link_expires_seconds:
+          type: integer
+          minimum: 3600
+          maximum: 7776000
+          default: 604800
+        link_require_login:
+          type: boolean
+          default: false
+        options:
+          type: object
+          additionalProperties: true
+          description: The destination's delivery options (recipients, templates, paths, ...).
+    DeliveryUpdate:
+      allOf:
+        - $ref: "#/components/schemas/DeliveryInput"
+        - type: object
+          required: [version]
+          properties:
+            version:
+              type: integer
+              format: int64
+    Delivery:
+      type: object
+      required: [id, report_id, channel_id, channel_name, channel_type, position, enabled, mode, formats, inline_row_limit, include_inline_with_files, link_expires_seconds, link_require_login, options, version]
+      properties:
+        id:
+          type: string
+          format: uuid
+        report_id:
+          type: string
+          format: uuid
+        channel_id:
+          type: string
+          format: uuid
+        channel_name:
+          type: string
+        channel_type:
+          type: string
+        position:
+          type: integer
+        enabled:
+          type: boolean
+        mode:
+          $ref: "#/components/schemas/DeliveryMode"
+        formats:
+          type: array
+          items:
+            type: string
+        inline_row_limit:
+          type: integer
+        include_inline_with_files:
+          type: boolean
+        link_expires_seconds:
+          type: integer
+        link_require_login:
+          type: boolean
+        options:
+          type: object
+          additionalProperties: true
+        version:
+          type: integer
+          format: int64
+    DeliveryList:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Delivery"
+
+    DeliveryPreviewRequest:
+      allOf:
+        - $ref: "#/components/schemas/DeliveryInput"
+        - type: object
+          required: [report_id]
+          properties:
+            report_id:
+              type: string
+              format: uuid
+    DeliveryPreview:
+      type: object
+      required: [body, body_type, attachments, links]
+      properties:
+        subject:
+          type: string
+        body:
+          type: string
+          description: HTML for email and Telegram (show it in a sandboxed frame), text otherwise.
+        body_type:
+          type: string
+          enum: [html, text, json]
+        attachments:
+          type: array
+          items:
+            type: string
+        links:
+          type: array
+          items:
+            type: string
+
+    TestDeliveryRequest:
+      type: object
+      properties:
+        channel_id:
+          type: string
+          format: uuid
+
+    DeliveryAttempt:
+      type: object
+      required: [id, delivery_id, channel_id, channel_name, channel_type, status, attempts, error_code, error_message, sent_at, meta, resendable, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        delivery_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Null for a test sent to the caller, or when the delivery was deleted.
+        channel_id:
+          type: string
+          format: uuid
+          nullable: true
+        channel_name:
+          type: string
+          description: Empty when the channel was deleted.
+        channel_type:
+          type: string
+        status:
+          type: string
+          enum: [pending, sending, sent, failed, skipped]
+        attempts:
+          type: integer
+          description: Tries so far, resends included.
+        error_code:
+          type: string
+          nullable: true
+        error_message:
+          type: string
+          nullable: true
+          description: The destination's message, with the channel's secrets removed.
+        sent_at:
+          type: string
+          format: date-time
+          nullable: true
+        meta:
+          type: object
+          additionalProperties: true
+          description: What was sent, such as the mode, attached files, links and fallbacks.
+        resendable:
+          type: boolean
+          description: Whether the attempt failed and can be sent again.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    RetryFailedRequest:
+      type: object
+      properties:
+        since:
+          type: string
+          format: date-time
+
+    RetryFailedResult:
+      type: object
+      required: [queued]
+      properties:
+        queued:
+          type: integer
+
+    RunFile:
+      type: object
+      required: [format, file_name, content_type, size_bytes, expires_at]
+      properties:
+        format:
+          type: string
+        file_name:
+          type: string
+        content_type:
+          type: string
+        size_bytes:
+          type: integer
+          format: int64
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    AISettings:
+      type: object
+      required: [provider, config]
+      properties:
+        provider:
+          type: string
+          description: The AI provider id; empty when the assistant is off.
+        config:
+          type: object
+          additionalProperties: true
+          description: 'Settings. Secret fields appear as `{ "configured": true|false }`.'
+    AISettingsInput:
+      type: object
+      required: [provider]
+      properties:
+        provider:
+          type: string
+          description: An AI provider id from `GET /plugins`, or empty to turn the assistant off.
+        config:
+          type: object
+          additionalProperties: true
+    OIDCConfig:
+      type: object
+      required: [enabled, issuer, client_id, scopes, button_label, auto_provision, default_role, allowed_domains]
+      properties:
+        enabled:
+          type: boolean
+        issuer:
+          type: string
+          description: The provider's issuer URL; discovery reads `/.well-known/openid-configuration` under it.
+        client_id:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+          description: Always includes `openid`; `email` and `profile` by default.
+        button_label:
+          type: string
+          maxLength: 60
+          description: Text of the sign-in button; empty shows "Sign in with single sign-on".
+        auto_provision:
+          type: boolean
+          description: Create a user on the first sign-in of someone without an account (email verified by the provider).
+        default_role:
+          type: string
+          enum: [viewer, editor]
+        allowed_domains:
+          type: array
+          items:
+            type: string
+          description: When not empty, only verified emails in these domains may sign in with OIDC.
+    OIDCSettings:
+      allOf:
+        - $ref: "#/components/schemas/OIDCConfig"
+        - type: object
+          required: [client_secret_configured, redirect_uri, available]
+          properties:
+            client_secret_configured:
+              type: boolean
+            redirect_uri:
+              type: string
+              description: The address to register at the provider; empty without ROWBIRD_BASE_URL.
+            available:
+              type: boolean
+              description: False without ROWBIRD_BASE_URL, which OIDC needs for its redirect URI.
+    OIDCSettingsInput:
+      allOf:
+        - $ref: "#/components/schemas/OIDCConfig"
+        - type: object
+          properties:
+            client_secret:
+              type: string
+              format: password
+              description: Absent keeps the stored secret; empty removes it (public clients rely on PKCE).
+    OIDCTestRequest:
+      type: object
+      required: [issuer]
+      properties:
+        issuer:
+          type: string
+    OIDCTestResult:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+        error_code:
+          type: string
+    AITestResult:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+        error_code:
+          type: string
+          example: ai.auth_failed
+        error_message:
+          type: string
+          description: What the service answered, with the settings' secrets removed.
+    AIStatus:
+      type: object
+      required: [enabled, provider]
+      properties:
+        enabled:
+          type: boolean
+        provider:
+          type: string
+          description: The provider id, empty when the assistant is off.
+    AIGenerateRequest:
+      type: object
+      required: [task, prompt]
+      properties:
+        task:
+          type: string
+          enum: [query, schedule]
+        prompt:
+          type: string
+          maxLength: 2000
+        connection_id:
+          type: string
+          format: uuid
+          description: Required for `query`; its dialect and cached schema go with the request.
+        sql:
+          type: string
+          maxLength: 20000
+          description: The editor's current SQL, for requests that change it.
+        timezone:
+          type: string
+          description: The report's time zone (schedule) or the browser's; schedules default to it.
+    AIProposal:
+      type: object
+      required: [task, sql, explanation, suggested_name, params, schedule, warnings, model]
+      properties:
+        task:
+          type: string
+          enum: [query, schedule]
+        sql:
+          type: string
+          description: Empty for `schedule`.
+        explanation:
+          type: string
+        suggested_name:
+          type: string
+        params:
+          type: array
+          description: Named parameters the SQL uses that are not built-in, suggested as text.
+          items:
+            $ref: "#/components/schemas/QueryParam"
+        schedule:
+          allOf:
+            - $ref: "#/components/schemas/AISchedule"
+          nullable: true
+        warnings:
+          type: array
+          description: 'Codes: ai.warning.not_read_only, multiple_statements, schedule_invalid, schema_truncated, no_schedule.'
+          items:
+            type: string
+        model:
+          type: string
+    AISchedule:
+      type: object
+      required: [cron, timezone, description, next]
+      properties:
+        cron:
+          type: string
+        timezone:
+          type: string
+        description:
+          type: string
+        next:
+          type: array
+          items:
+            type: string
+            format: date-time
+
+    ExportRequest:
+      type: object
+      properties:
+        reports:
+          type: array
+          items:
+            type: string
+          description: Report slugs; each brings its query.
+        queries:
+          type: array
+          items:
+            type: string
+          description: Query slugs.
+        include_connections:
+          type: boolean
+          default: false
+        include_channels:
+          type: boolean
+          default: false
+    ImportPolicy:
+      type: string
+      enum: [fail, overwrite, copy, skip]
+    ImportRequest:
+      type: object
+      required: [yaml]
+      properties:
+        yaml:
+          type: string
+          maxLength: 5000000
+        dry_run:
+          type: boolean
+          default: true
+        policy:
+          allOf:
+            - $ref: "#/components/schemas/ImportPolicy"
+          description: For conflicts without their own policy (default fail).
+        items:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/ImportPolicy"
+          description: Policies by document key, such as `Report/daily-sales`.
+        map:
+          type: object
+          additionalProperties:
+            type: string
+          description: Missing connection or channel names to existing ones.
+        secrets:
+          type: object
+          additionalProperties:
+            type: string
+          description: Values for `${env:NAME}` placeholders, by NAME. Never stored outside the resources.
+    ImportResult:
+      type: object
+      required: [applied, items, missing, secrets, errors]
+      properties:
+        applied:
+          type: boolean
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportItem"
+        missing:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportMissing"
+        secrets:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportSecret"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportError"
+    ImportPos:
+      type: object
+      required: [file, line, column]
+      properties:
+        file:
+          type: string
+        line:
+          type: integer
+        column:
+          type: integer
+    ImportItem:
+      type: object
+      required: [kind, name, pos, action, target, changes]
+      properties:
+        kind:
+          type: string
+          enum: [Connection, Channel, Query, Report]
+        name:
+          type: string
+        pos:
+          $ref: "#/components/schemas/ImportPos"
+        action:
+          type: string
+          enum: [create, update, unchanged, conflict, skip]
+        policy:
+          $ref: "#/components/schemas/ImportPolicy"
+        target:
+          type: string
+          description: The name after the import (differs from name for a copy).
+        changes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportChange"
+    ImportChange:
+      type: object
+      required: [field]
+      properties:
+        field:
+          type: string
+        from: {}
+        to: {}
+        secret:
+          type: boolean
+          description: A secret that changes; its values are never shown.
+    ImportMissing:
+      type: object
+      required: [kind, name, pos]
+      properties:
+        kind:
+          type: string
+        name:
+          type: string
+        pos:
+          $ref: "#/components/schemas/ImportPos"
+    ImportSecret:
+      type: object
+      required: [env, kind, name, field, required, provided]
+      properties:
+        env:
+          type: string
+        kind:
+          type: string
+        name:
+          type: string
+        field:
+          type: string
+        required:
+          type: boolean
+          description: The resource is new, so the value is needed; otherwise the stored secret is kept.
+        provided:
+          type: boolean
+    ImportError:
+      type: object
+      required: [pos, message]
+      properties:
+        pos:
+          $ref: "#/components/schemas/ImportPos"
+        message:
+          type: string
+    ManagedResource:
+      type: object
+      required: [kind, id]
+      properties:
+        kind:
+          type: string
+          enum: [connection, channel, query, report]
+        id:
+          type: string
+          format: uuid

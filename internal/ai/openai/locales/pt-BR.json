@@ -1,0 +1,14 @@
+{
+  "plugin.openai.name": "OpenAI",
+  "plugin.openai.description": "Modelos GPT pela API da OpenAI, com as respostas conferidas contra um schema.",
+  "plugin.openai.model.help": "O id do modelo, por exemplo gpt-4.1 ou gpt-4.1-mini.",
+  "plugin.openai.base_url.help": "Mude só para passar por um proxy que atende a mesma API.",
+  "plugin.openai_compatible.name": "API compatível com a OpenAI",
+  "plugin.openai_compatible.description": "Qualquer serviço com a API de chat da OpenAI: OpenRouter, LM Studio, vLLM, Groq e outros.",
+  "plugin.openai_compatible.base_url.help": "O endereço que termina antes de /chat/completions, por exemplo http://localhost:1234/v1.",
+  "plugin.openai_compatible.model.help": "O id do modelo como o serviço o chama.",
+  "plugin.openai_compatible.structured.label": "Respostas estruturadas",
+  "plugin.openai_compatible.structured.help": "O modo JSON funciona em quase todos; um schema JSON é mais rígido, quando o serviço aceita.",
+  "plugin.openai_compatible.structured.json_object": "Modo JSON",
+  "plugin.openai_compatible.structured.json_schema": "Schema JSON"
+}

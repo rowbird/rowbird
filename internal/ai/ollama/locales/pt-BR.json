@@ -1,0 +1,7 @@
+{
+  "plugin.ollama.name": "Ollama",
+  "plugin.ollama.description": "Modelos rodando na sua própria rede pelo Ollama. Nada sai da sua infraestrutura.",
+  "plugin.ollama.base_url.help": "Onde o Ollama escuta, por exemplo http://localhost:11434.",
+  "plugin.ollama.model.help": "Um modelo que você baixou, por exemplo qwen2.5-coder:14b ou llama3.1:8b.",
+  "plugin.ollama.api_key.help": "Só quando um proxy na frente do Ollama pede um token bearer."
+}

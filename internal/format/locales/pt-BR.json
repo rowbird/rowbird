@@ -1,0 +1,11 @@
+{
+  "format.bytes": "({n} bytes)",
+  "format.generatedAt": "Gerado em {time}",
+  "format.limitCut": "O resultado foi cortado no limite de linhas.",
+  "format.no": "não",
+  "format.noRows": "Nenhuma linha.",
+  "format.page": "Página {n} de {total}",
+  "format.showing": "Mostrando {shown} de {total} linhas.",
+  "format.viewFull": "Ver o relatório completo",
+  "format.yes": "sim"
+}

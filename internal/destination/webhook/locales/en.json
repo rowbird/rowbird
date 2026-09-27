@@ -1,0 +1,16 @@
+{
+  "plugin.webhook.description": "Sends each run as JSON to a URL, signed so that the receiver can verify it.",
+  "plugin.webhook.headers.help": "One per line, as Name: value.",
+  "plugin.webhook.headers.label": "Headers",
+  "plugin.webhook.hmac_secret.help": "Signs every request in X-Rowbird-Signature (HMAC-SHA256). Leave empty to send unsigned requests.",
+  "plugin.webhook.hmac_secret.label": "Signing secret",
+  "plugin.webhook.include_links.label": "Include links to the files",
+  "plugin.webhook.include_rows.help": "The first rows of the result go in the payload, up to 1,000.",
+  "plugin.webhook.include_rows.label": "Rows to include",
+  "plugin.webhook.method.POST": "POST",
+  "plugin.webhook.method.PUT": "PUT",
+  "plugin.webhook.method.label": "Method",
+  "plugin.webhook.name": "Webhook",
+  "plugin.webhook.secret_headers.label": "Secret headers",
+  "plugin.webhook.url.label": "URL"
+}

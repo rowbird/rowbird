@@ -1,0 +1,129 @@
+{
+  "errors": {
+    "ai": {
+      "not_configured": "The AI assistant is not set up. An admin can choose a provider in Settings > AI.",
+      "no_schema": "The connection's schema has not been read yet. Refresh it on the connection page first.",
+      "too_many_requests": "Too many assistant requests. Wait a few minutes and try again.",
+      "auth_failed": "The AI provider refused the API key. Check it in Settings > AI.",
+      "rejected": "The AI provider refused the request.",
+      "unreachable": "The AI provider could not be reached.",
+      "rate_limited": "The AI provider is limiting requests. Try again later.",
+      "timeout": "The AI provider took too long to answer.",
+      "network_blocked": "The AI provider's address is blocked by the network policy.",
+      "failed": "The AI provider failed to answer.",
+      "invalid_output": "The AI answer could not be used. Try rephrasing the request."
+    },
+    "auth": {
+      "challenge_expired": "The sign-in attempt expired. Sign in again",
+      "csrf_failed": "The request could not be verified. Reload the page and try again",
+      "forbidden": "You do not have permission to do this",
+      "invalid_credentials": "Incorrect email or password",
+      "locked": "Too many failed attempts. The account is temporarily locked",
+      "mfa_invalid": "Incorrect verification code",
+      "mfa_setup_required": "You must set up two-factor authentication before continuing",
+      "password_change_required": "You must change your password before continuing",
+      "rate_limited": "Too many attempts. Wait a moment and try again",
+      "unauthenticated": "You need to sign in",
+      "oidc_unavailable": "Single sign-on is not set up",
+      "oidc_failed": "Single sign-on failed",
+      "oidc_no_account": "There is no account for this identity",
+      "oidc_domain_not_allowed": "This email domain may not sign in",
+      "oidc_email_unverified": "The provider did not verify this email",
+      "oidc_discovery_failed": "The identity provider could not be reached",
+      "reset_invalid": "This password reset link is invalid, was already used or has expired"
+    },
+    "channel": {
+      "name_taken": "A channel with this name already exists",
+      "in_use": "The channel is used by reports and cannot be deleted"
+    },
+    "conflict": {
+      "duplicate": "A resource with this value already exists",
+      "version": "This resource was changed by someone else. Reload and try again"
+    },
+    "connection": {
+      "auth_failed": "The database rejected the user or password",
+      "database_not_found": "The database was not found, or the user cannot access it",
+      "failed": "The connection failed",
+      "host_unreachable": "The database server could not be reached",
+      "in_use": "The connection is used by queries and cannot be deleted",
+      "name_taken": "A connection with this name already exists",
+      "network_blocked": "The network policy of this Rowbird does not allow this address",
+      "path_not_allowed": "The file is outside the directories allowed for SQLite",
+      "ssh_auth_failed": "The SSH host rejected the user or key",
+      "ssh_host_key_mismatch": "The SSH host key changed since it was confirmed",
+      "ssh_host_key_unknown": "The SSH host key must be confirmed",
+      "ssh_unreachable": "The SSH host could not be reached",
+      "timeout": "The database server did not answer in time",
+      "tls_failed": "The encrypted (TLS) connection could not be established",
+      "tls_required": "The database server requires an encrypted (TLS) connection"
+    },
+    "delivery": {
+      "no_system_mailer": "No email channel is marked for system mail. Mark one in Channels to send tests by email.",
+      "not_failed": "Only a failed delivery can be sent again.",
+      "not_resendable": "This delivery cannot be sent again: it was a test to you, or its delivery was deleted."
+    },
+    "gitops": {
+      "not_managed": "This is not managed by the configuration directory.",
+      "not_detached": "This was not detached from the configuration directory."
+    },
+    "internal": "Something went wrong on the server",
+    "link": {
+      "not_found": "This link does not exist. Check that it was copied completely.",
+      "expired": "This link has expired or was revoked. Ask whoever shared it for a new one.",
+      "login_required": "Sign in to open this link.",
+      "revoked": "The link was already revoked"
+    },
+    "query": {
+      "cancelled": "The query was cancelled",
+      "failed": "The database could not run the query",
+      "in_use": "The query is used by reports and cannot be deleted",
+      "multiple_statements": "Only one statement is allowed; the connection does not allow several",
+      "read_only": "The query tried to change data, and Rowbird only reads",
+      "slug_taken": "A query with this slug already exists",
+      "timeout": "The query took longer than the time limit"
+    },
+    "report": {
+      "slug_taken": "A report with this slug already exists",
+      "run_active": "The report has a run in progress. Wait for it or cancel it first"
+    },
+    "request": {
+      "invalid": "The request is invalid",
+      "method_not_allowed": "This method is not allowed for this resource",
+      "unsupported_media_type": "Requests must be sent as JSON"
+    },
+    "resource": {
+      "not_found": "The resource was not found",
+      "managed_by_gitops": "This is managed by the configuration directory. An admin can detach it to change it here."
+    },
+    "route": {
+      "not_found": "There is no API endpoint at this path"
+    },
+    "run": {
+      "not_active": "The run has already finished",
+      "result_unavailable": "The result of this run is no longer available"
+    },
+    "setup": {
+      "completed": "Rowbird is already set up",
+      "invalid_token": "The setup token is incorrect"
+    },
+    "totp": {
+      "already_enabled": "Two-factor authentication is already on",
+      "not_enabled": "Two-factor authentication is not on",
+      "not_started": "Start the two-factor setup first"
+    },
+    "user": {
+      "email_taken": "A user with this email already exists",
+      "last_admin": "The workspace needs at least one active admin",
+      "self_modification": "You cannot change your own role or disable your own account"
+    },
+    "validation": {
+      "failed": "Some fields are invalid",
+      "not_found": "Does not exist."
+    },
+    "passkey": {
+      "unavailable": "Passkeys need the public URL of this server (ROWBIRD_BASE_URL)",
+      "failed": "The passkey could not be verified",
+      "exists": "This passkey is already registered"
+    }
+  }
+}

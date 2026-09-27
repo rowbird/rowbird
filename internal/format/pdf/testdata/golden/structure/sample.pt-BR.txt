@@ -1,0 +1,134 @@
+maroto
+  page
+    row "16"
+      col "100"
+        text "Vendas por região" bold
+        text "Gerado em 25/09/2026 09:00"
+    row "8.644444444444446"
+      col "13"
+        text "id" right bold
+      col "18"
+        text "região" bold
+      col "18"
+        text "total" right bold
+      col "7"
+        text "ratio" right bold
+      col "5"
+        text "active" bold
+      col "7"
+        text "day" bold
+      col "12"
+        text "created_at" bold
+      col "5"
+        text "at" bold
+      col "9"
+        text "payload" bold
+      col "6"
+        text "raw" bold
+    row "8.644444444444446"
+      col "13"
+        text "1" right
+      col "18"
+        text "São Paulo"
+      col "18"
+        text "1.234,50" right
+      col "7"
+        text "0,25" right
+      col "5"
+        text "sim"
+      col "7"
+        text "25/09/2026"
+      col "12"
+        text "25/09/2026 10:30"
+      col "5"
+        text "08:30:00"
+      col "9"
+        text "{\"a\":1}"
+      col "6"
+        text "(2 bytes)"
+    row "8.644444444444446"
+      col "13"
+        text "9.007.199.254.740.993" right
+      col "18"
+        text "=HYPERLINK(\"http://x\")"
+      col "18"
+        text "-12.345.678.901.234.567.890.123.456.789.012.345,67" right
+      col "7"
+        text "-1,5" right
+      col "5"
+        text "não"
+      col "7"
+        text "29/02/2024"
+      col "12"
+        text "26/09/2026 12:30:05"
+      col "5"
+        text "23:59:59"
+      col "9"
+        text "[]"
+      col "6"
+        text "(0 bytes)"
+    row "8.644444444444446"
+      col "13"
+        text "-3" right
+      col "18"
+        text "<script>alert(\"x\")</script> & 'quotes'"
+      col "18"
+        text "0,00" right
+      col "7"
+        text "0,0000001" right
+      col "5"
+        text "sim"
+      col "7"
+        text "31/12/1999"
+      col "12"
+        text "31/12/1999 21:59"
+      col "5"
+        text "00:00:00"
+      col "9"
+        text "{\"quote\":\"\\\"\"}"
+      col "6"
+        text "(1 bytes)"
+    row "5.822222222222223"
+      col "13"
+        text "4" right
+      col "18"
+        text "line one line two, with ; and \""
+      col "18"
+        text "7" right
+      col "7"
+        text "3" right
+      col "5"
+        text "não"
+      col "7"
+        text
+      col "12"
+        text
+      col "5"
+        text
+      col "9"
+        text
+      col "6"
+        text
+    row "3"
+      col "13"
+        text right
+      col "18"
+        text
+      col "18"
+        text right
+      col "7"
+        text right
+      col "5"
+        text
+      col "7"
+        text
+      col "12"
+        text
+      col "5"
+        text
+      col "9"
+        text
+      col "6"
+        text
+    row "120.5975"
+      col "100"

@@ -1,0 +1,33 @@
+# The demo's database and mail server. Rowbird applies this directory (ROWBIRD_CONFIG_DIR) right
+# after the setup wizard creates the first admin, and again at every start.
+apiVersion: rowbird.dev/v1
+kind: Connection
+metadata:
+  name: shop-db
+spec:
+  driver: postgres
+  config:
+    host: postgres
+    port: 5432
+    database: shop
+    user: rowbird_reader
+    tls_mode: disable
+  secrets:
+    # Secrets never live in these files: the value comes from the server's environment.
+    password: ${env:DEMO_SHOP_PASSWORD}
+  options:
+    queryTimeoutSeconds: 30
+    maxRows: 10000
+---
+apiVersion: rowbird.dev/v1
+kind: Channel
+metadata:
+  name: team-email
+spec:
+  type: email
+  config:
+    host: mailpit
+    port: 1025
+    tls_mode: none
+    from_address: rowbird@example.com
+    from_name: Rowbird demo

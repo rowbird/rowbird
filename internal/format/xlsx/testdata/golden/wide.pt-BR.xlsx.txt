@@ -1,0 +1,40 @@
+title="Vendas por região" creator="Rowbird" created=2026-09-25T12:00:00Z
+sheets=["Vendas por região"]
+freeze=true ysplit=1 topleft=A2
+defined _xlnm._FilterDatabase='Vendas por região'!$A$1:$I$3
+width A=10
+width B=14
+width C=20
+width D=26
+width E=32
+width F=38
+width G=44
+width H=50
+width I=56
+A1 type=5 raw="column_1" bold
+B1 type=5 raw="column_2" bold
+C1 type=5 raw="column_3" bold
+D1 type=5 raw="column_4" bold
+E1 type=5 raw="column_5" bold
+F1 type=5 raw="column_6" bold
+G1 type=5 raw="column_7" bold
+H1 type=5 raw="column_8" bold
+I1 type=5 raw="column_9" bold
+A2 type=5 raw="value "
+B2 type=5 raw="value value "
+C2 type=5 raw="value value value "
+D2 type=5 raw="value value value value "
+E2 type=5 raw="value value value value value "
+F2 type=5 raw="value value value value value value "
+G2 type=5 raw="value value value value value value value "
+H2 type=5 raw="value value value value value value value value "
+I2 type=5 raw="value value value value value value value value value "
+A3 type=5 raw="value "
+B3 type=5 raw="value value "
+C3 type=5 raw="value value value "
+D3 type=5 raw="value value value value "
+E3 type=5 raw="value value value value value "
+F3 type=5 raw="value value value value value value "
+G3 type=5 raw="value value value value value value value "
+H3 type=5 raw="value value value value value value value value "
+I3 type=5 raw="value value value value value value value value value "

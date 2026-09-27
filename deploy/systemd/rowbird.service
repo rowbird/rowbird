@@ -1,0 +1,59 @@
+# Rowbird as a systemd service (https://docs.rowbird.dev/install/binary).
+#
+#   sudo install -m 0755 rowbird /usr/local/bin/rowbird
+#   sudo useradd --system --home /var/lib/rowbird --shell /usr/sbin/nologin rowbird
+#   sudo install -d -o root -g rowbird -m 0750 /etc/rowbird
+#   sudoedit /etc/rowbird/rowbird.env         # ROWBIRD_* variables, one per line
+#   sudo cp rowbird.service /etc/systemd/system/ && sudo systemctl daemon-reload
+#   sudo systemctl enable --now rowbird
+#
+# StateDirectory creates /var/lib/rowbird owned by the rowbird user; Rowbird keeps its SQLite
+# database, generated master key, artifacts and backups there.
+
+[Unit]
+Description=Rowbird: scheduled SQL reports and alerts
+Documentation=https://docs.rowbird.dev
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=rowbird
+Group=rowbird
+Environment=ROWBIRD_DATA_DIR=/var/lib/rowbird
+EnvironmentFile=-/etc/rowbird/rowbird.env
+ExecStart=/usr/local/bin/rowbird serve
+Restart=on-failure
+RestartSec=5s
+# Running reports get ROWBIRD_SHUTDOWN_TIMEOUT (30s by default) to finish.
+TimeoutStopSec=45s
+
+StateDirectory=rowbird
+StateDirectoryMode=0750
+UMask=0027
+
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+AmbientCapabilities=
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged @resources
+
+[Install]
+WantedBy=multi-user.target

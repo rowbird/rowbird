@@ -1,0 +1,35 @@
+name: New destination
+description: Propose delivering results somewhere new.
+labels: ["plugin", "destination", "triage"]
+body:
+  - type: input
+    id: service
+    attributes:
+      label: Service
+      placeholder: Microsoft Teams, Google Chat, Mattermost, ntfy, ...
+    validations:
+      required: true
+  - type: textarea
+    id: api
+    attributes:
+      label: How does it receive messages?
+      description: API or webhook docs, authentication, limits on text and files.
+  - type: checkboxes
+    id: modes
+    attributes:
+      label: Which delivery modes make sense?
+      options:
+        - label: inline (the rows in the message)
+        - label: attachment (files)
+        - label: link (a download link)
+  - type: textarea
+    id: config
+    attributes:
+      label: Channel and delivery options
+      description: What the channel needs (mark secrets) and what each delivery can choose.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to implement it (see the plugin development guide)

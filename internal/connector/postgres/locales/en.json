@@ -1,0 +1,5 @@
+{
+  "plugin.postgres.description": "PostgreSQL 12 or later, including managed services such as Amazon RDS, Cloud SQL, Supabase and Neon.",
+  "plugin.postgres.name": "PostgreSQL",
+  "plugin.postgres.tls_mode.help": "prefer uses TLS when the server offers it. verify-full also checks the certificate and the host name, and is recommended over the internet."
+}

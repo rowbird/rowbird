@@ -1,0 +1,15 @@
+{
+  "destination.alertView": "Abrir no Rowbird",
+  "destination.expires": "Os links expiram em {time}.",
+  "destination.fallback": "Alguns arquivos eram grandes demais para anexar e foram compartilhados como links.",
+  "destination.files": "Arquivos",
+  "destination.footer": "Enviado pelo Rowbird",
+  "destination.status.failed": "falhou",
+  "destination.status.skipped": "pulada",
+  "destination.status.success": "concluída",
+  "destination.status.test": "teste",
+  "destination.testBody": "Este canal está configurado corretamente. Os relatórios entregues aqui vão chegar assim.",
+  "destination.testTitle": "Mensagem de teste do Rowbird",
+  "destination.view": "Ver a execução",
+  "plugin.template.help": "Template Mustache. Use variáveis como {{report.name}}, {{run.rows}} ou {{run.url}}."
+}

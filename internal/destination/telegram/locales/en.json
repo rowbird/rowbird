@@ -1,0 +1,13 @@
+{
+  "plugin.telegram.api_base.help": "Change only for a self-hosted Bot API server.",
+  "plugin.telegram.api_base.label": "Bot API address",
+  "plugin.telegram.bot_token.help": "From BotFather. Add the bot to the chat before delivering to it.",
+  "plugin.telegram.bot_token.label": "Bot token",
+  "plugin.telegram.chat_id.help": "The chat id (such as -1001234567890) or @channelname.",
+  "plugin.telegram.chat_id.label": "Chat",
+  "plugin.telegram.description": "Sends each run to a Telegram chat through a bot, with the result and the files.",
+  "plugin.telegram.message.default": "<b>{{report.name}}</b>\n{{run.rows}} rows · {{run.started_at}}",
+  "plugin.telegram.message.label": "Message",
+  "plugin.telegram.name": "Telegram",
+  "plugin.telegram.silent.label": "Send without notification"
+}

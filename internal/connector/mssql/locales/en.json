@@ -1,0 +1,6 @@
+{
+  "plugin.mssql.description": "Microsoft SQL Server 2017 or later and Azure SQL Database.",
+  "plugin.mssql.name": "SQL Server",
+  "plugin.mssql.tls_mode.help": "require encrypts without checking the certificate. verify-full also checks the certificate and host name; strict uses TDS 8 and is required by some Azure setups.",
+  "plugin.mssql.user.help": "SQL Server cannot keep a query read-only by itself: use a login that is only a member of db_datareader. Rowbird never needs to write."
+}

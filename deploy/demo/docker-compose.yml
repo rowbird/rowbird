@@ -1,0 +1,49 @@
+# Rowbird demo: Rowbird, a Postgres database with a fictional shop, and Mailpit to catch the email.
+#
+#   docker compose up
+#
+# Then open http://localhost:8080, create the first admin, and watch http://localhost:8025.
+# Everything here is for trying Rowbird on your machine; see deploy/compose for a production setup.
+name: rowbird-demo
+
+services:
+  rowbird:
+    image: ${ROWBIRD_IMAGE:-ghcr.io/rowbird/rowbird:1}
+    ports:
+      - "8080:8080"
+    environment:
+      ROWBIRD_BASE_URL: http://localhost:8080
+      ROWBIRD_CONFIG_DIR: /config
+      ROWBIRD_UPDATE_CHECK: "false"
+      # Read by config/01-connections-and-channels.yaml; a real setup keeps it out of the file.
+      DEMO_SHOP_PASSWORD: demo-reader-password
+    volumes:
+      - rowbird-data:/data
+      - ./config:/config:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: shop
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: demo-owner-password
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "shop", "-d", "shop"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    ports:
+      - "8025:8025"
+
+volumes:
+  rowbird-data:

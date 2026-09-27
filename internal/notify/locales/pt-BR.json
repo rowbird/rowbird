@@ -1,0 +1,14 @@
+{
+  "notify.channelFailing.text": "As entregas pelo canal {channel_type} {channel} estão falhando: {error}. O Rowbird conta as próximas falhas neste alerta e manda uma mensagem quando o canal voltar a funcionar.",
+  "notify.channelFailing.title": "O canal {channel} está falhando",
+  "notify.channelRecovered.text": "As entregas pelo canal {channel_type} {channel} voltaram a funcionar.",
+  "notify.channelRecovered.title": "O canal {channel} voltou a funcionar",
+  "notify.passwordReset.text": "Alguém pediu para redefinir a senha da sua conta no Rowbird. Abra o link abaixo em até {minutes} minutos para escolher uma nova; ele funciona uma vez só. Se não foi você, ignore este email: sua senha continua a mesma.",
+  "notify.passwordReset.title": "Redefina sua senha do Rowbird",
+  "notify.reportFailing.text": "Uma execução de {report} falhou com {error_code}. O Rowbird conta as próximas falhas neste alerta e manda uma mensagem quando o relatório voltar a funcionar.",
+  "notify.reportFailing.title": "O relatório {report} falhou",
+  "notify.reportPaused.text": "{report} falhou {failures} vezes seguidas e foi pausado. Ele não roda mais no agendamento até alguém retomá-lo.",
+  "notify.reportPaused.title": "O relatório {report} foi pausado",
+  "notify.reportRecovered.text": "{report} voltou a rodar com sucesso.",
+  "notify.reportRecovered.title": "O relatório {report} voltou a funcionar"
+}

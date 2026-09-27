@@ -1,0 +1,8 @@
+{
+  "plugin.format.html_table.description": "A table inside an email, readable in every email client.",
+  "plugin.format.html_table.name": "HTML table",
+  "plugin.format.markdown_table.description": "A table inside a Slack or Discord message.",
+  "plugin.format.markdown_table.name": "Markdown table",
+  "plugin.format.text.description": "An aligned table inside a Telegram message.",
+  "plugin.format.text.name": "Text table"
+}

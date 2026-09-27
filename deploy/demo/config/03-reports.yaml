@@ -1,0 +1,91 @@
+# Four reports that show the main delivery modes. The first one runs every minute so an email
+# lands in Mailpit (http://localhost:8025) right away; pause it in the UI when you have seen it.
+apiVersion: rowbird.dev/v1
+kind: Report
+metadata:
+  name: sales-pulse
+  title: Sales pulse
+  description: Today's sales by region, in the body of the email
+spec:
+  query:
+    ref: sales-today-by-region
+  schedule:
+    cron: "* * * * *"
+    timezone: UTC
+  enabled: true
+  deliveries:
+    - channel: team-email
+      mode: inline
+      inline:
+        rows: 20
+      options:
+        to: sales@example.com
+---
+apiVersion: rowbird.dev/v1
+kind: Report
+metadata:
+  name: low-stock-alert
+  title: Low stock alert
+  description: Sent only when some product is below its reorder point and the list changed
+spec:
+  query:
+    ref: low-stock
+  schedule:
+    cron: "*/5 * * * *"
+    timezone: UTC
+  condition:
+    match: all
+    rules:
+      - type: has_rows
+      - type: changed
+  enabled: true
+  deliveries:
+    - channel: team-email
+      mode: inline
+      options:
+        to: purchasing@example.com
+---
+apiVersion: rowbird.dev/v1
+kind: Report
+metadata:
+  name: weekly-top-customers
+  title: Weekly top customers
+  description: Excel and PDF attachments every Monday; use "Run now" to see it immediately
+spec:
+  query:
+    ref: top-customers
+  schedule:
+    cron: "0 8 * * 1"
+    timezone: UTC
+  params:
+    top: 10
+  enabled: true
+  deliveries:
+    - channel: team-email
+      mode: attachment
+      formats: [xlsx, pdf]
+      options:
+        to: management@example.com
+---
+apiVersion: rowbird.dev/v1
+kind: Report
+metadata:
+  name: monthly-revenue-by-category
+  title: Monthly revenue by category
+  description: A download link to a CSV, on the first day of each month
+spec:
+  query:
+    ref: revenue-by-category
+  schedule:
+    cron: "0 7 1 * *"
+    timezone: UTC
+  enabled: true
+  deliveries:
+    - channel: team-email
+      mode: link
+      formats: [csv]
+      link:
+        expiresIn: 7d
+        requireLogin: false
+      options:
+        to: finance@example.com

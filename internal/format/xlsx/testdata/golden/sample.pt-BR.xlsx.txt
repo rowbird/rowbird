@@ -1,0 +1,58 @@
+title="Vendas por região" creator="Rowbird" created=2026-09-25T12:00:00Z
+sheets=["Vendas por região"]
+freeze=true ysplit=1 topleft=A2
+defined _xlnm._FilterDatabase='Vendas por região'!$A$1:$J$6
+width A=23
+width B=40
+width C=52
+width D=11
+width E=8
+width F=12
+width G=21
+width H=10
+width I=16
+width J=11
+A1 type=5 raw="id" bold
+B1 type=5 raw="região" bold
+C1 type=5 raw="total" bold
+D1 type=5 raw="ratio" bold
+E1 type=5 raw="active" bold
+F1 type=5 raw="day" bold
+G1 type=5 raw="created_at" bold
+H1 type=5 raw="at" bold
+I1 type=5 raw="payload" bold
+J1 type=5 raw="raw" bold
+A2 type=0 raw="1"
+B2 type=5 raw="São Paulo"
+C2 type=0 raw="1234.5" shown="1,234.50" fmt="#,##0.00"
+D2 type=0 raw="0.25"
+E2 type=1 raw="1" shown="TRUE"
+F2 type=0 raw="46290" shown="25/09/2026" fmt="dd/mm/yyyy"
+G2 type=0 raw="46290.4375" shown="25/09/2026 10:30:00" fmt="dd/mm/yyyy hh:mm:ss"
+H2 type=5 raw="08:30:00"
+I2 type=5 raw="{\"a\":1}"
+J2 type=5 raw="3q0="
+A3 type=5 raw="9007199254740993"
+B3 type=5 raw="'=HYPERLINK(\"http://x\")"
+C3 type=5 raw="-12345678901234567890123456789012345.67"
+D3 type=0 raw="-1.5"
+E3 type=1 raw="0" shown="FALSE"
+F3 type=0 raw="45351" shown="29/02/2024" fmt="dd/mm/yyyy"
+G3 type=0 raw="46291.520891203705" shown="26/09/2026 12:30:05" fmt="dd/mm/yyyy hh:mm:ss"
+H3 type=5 raw="23:59:59"
+I3 type=5 raw="[]"
+A4 type=0 raw="-3"
+B4 type=5 raw="<script>alert(\"x\")</script> & 'quotes'"
+C4 type=0 raw="0" shown="0.00" fmt="#,##0.00"
+D4 type=0 raw="0.0000001"
+E4 type=1 raw="1" shown="TRUE"
+F4 type=0 raw="36525" shown="31/12/1999" fmt="dd/mm/yyyy"
+G4 type=0 raw="36525.915972222225" shown="31/12/1999 21:59:00" fmt="dd/mm/yyyy hh:mm:ss"
+H4 type=5 raw="00:00:00"
+I4 type=5 raw="{\"quote\":\"\\\"\"}"
+J4 type=5 raw="eA=="
+A5 type=0 raw="4"
+B5 type=5 raw="line one\nline two, with ; and \""
+C5 type=0 raw="7" fmt="#,##0"
+D5 type=0 raw="3"
+E5 type=1 raw="0" shown="FALSE"

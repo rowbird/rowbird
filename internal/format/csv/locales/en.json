@@ -1,0 +1,22 @@
+{
+  "plugin.format.csv.bom.auto": "Automatic",
+  "plugin.format.csv.bom.label": "Byte order mark",
+  "plugin.format.csv.bom.no": "No",
+  "plugin.format.csv.bom.yes": "Yes",
+  "plugin.format.csv.delimiter.auto": "Automatic",
+  "plugin.format.csv.delimiter.comma": "Comma",
+  "plugin.format.csv.delimiter.help": "Automatic uses a semicolon in Portuguese and a comma in English, like spreadsheets expect.",
+  "plugin.format.csv.delimiter.label": "Separator",
+  "plugin.format.csv.delimiter.pipe": "Vertical bar",
+  "plugin.format.csv.delimiter.semicolon": "Semicolon",
+  "plugin.format.csv.delimiter.tab": "Tab",
+  "plugin.format.csv.description": "Comma-separated values, for spreadsheets and other tools.",
+  "plugin.format.csv.encoding.label": "Encoding",
+  "plugin.format.csv.encoding.utf-8": "UTF-8",
+  "plugin.format.csv.encoding.windows-1252": "Windows-1252 (older Excel)",
+  "plugin.format.csv.header.label": "Include the column names",
+  "plugin.format.csv.name": "CSV",
+  "plugin.format.csv.number_format.label": "Numbers",
+  "plugin.format.csv.number_format.locale": "Decimal separator of the language",
+  "plugin.format.csv.number_format.plain": "Always a decimal point"
+}

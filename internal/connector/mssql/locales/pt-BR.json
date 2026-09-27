@@ -1,0 +1,6 @@
+{
+  "plugin.mssql.description": "Microsoft SQL Server 2017 ou mais recente e Azure SQL Database.",
+  "plugin.mssql.name": "SQL Server",
+  "plugin.mssql.tls_mode.help": "require criptografa sem conferir o certificado. verify-full também confere o certificado e o nome do host; strict usa TDS 8 e é exigido em algumas configurações do Azure.",
+  "plugin.mssql.user.help": "O SQL Server não consegue manter uma consulta somente leitura por conta própria: use um login que seja só membro de db_datareader. O Rowbird nunca precisa escrever."
+}

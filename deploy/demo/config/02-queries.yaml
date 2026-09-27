@@ -1,0 +1,77 @@
+apiVersion: rowbird.dev/v1
+kind: Query
+metadata:
+  name: sales-today-by-region
+  title: Sales today by region
+  description: Orders and revenue since midnight, per region
+spec:
+  connection: shop-db
+  sql: |
+    SELECT c.region,
+           count(*)     AS orders,
+           sum(o.total) AS revenue
+    FROM orders o
+    JOIN customers c ON c.id = o.customer_id
+    WHERE o.created_at >= {{today}}
+      AND o.status <> 'refunded'
+    GROUP BY c.region
+    ORDER BY revenue DESC
+---
+apiVersion: rowbird.dev/v1
+kind: Query
+metadata:
+  name: low-stock
+  title: Products below their reorder point
+spec:
+  connection: shop-db
+  sql: |
+    SELECT p.sku, p.name, cat.name AS category, p.stock, p.reorder_at
+    FROM products p
+    JOIN categories cat ON cat.id = p.category_id
+    WHERE p.stock <= p.reorder_at
+    ORDER BY p.stock
+---
+apiVersion: rowbird.dev/v1
+kind: Query
+metadata:
+  name: top-customers
+  title: Top customers
+  description: Best customers this year, by revenue
+spec:
+  connection: shop-db
+  sql: |
+    SELECT c.name, c.email, c.region,
+           count(*)     AS orders,
+           sum(o.total) AS revenue
+    FROM orders o
+    JOIN customers c ON c.id = o.customer_id
+    WHERE o.created_at >= {{start_of_year}}
+      AND o.status <> 'refunded'
+    GROUP BY c.id, c.name, c.email, c.region
+    ORDER BY revenue DESC
+    LIMIT {{top}}
+  params:
+    - name: top
+      type: integer
+      default: 20
+---
+apiVersion: rowbird.dev/v1
+kind: Query
+metadata:
+  name: revenue-by-category
+  title: Revenue by category, last month
+spec:
+  connection: shop-db
+  sql: |
+    SELECT cat.name AS category,
+           sum(i.quantity)              AS units,
+           sum(i.quantity * i.unit_price) AS revenue
+    FROM order_items i
+    JOIN orders o     ON o.id = i.order_id
+    JOIN products p   ON p.id = i.product_id
+    JOIN categories cat ON cat.id = p.category_id
+    WHERE o.created_at >= {{start_of_last_month}}
+      AND o.created_at <  {{start_of_month}}
+      AND o.status <> 'refunded'
+    GROUP BY cat.name
+    ORDER BY revenue DESC

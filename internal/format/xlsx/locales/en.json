@@ -1,0 +1,4 @@
+{
+  "plugin.format.xlsx.name": "Excel",
+  "plugin.format.xlsx.description": "An Excel workbook with typed cells, a frozen header and filters."
+}

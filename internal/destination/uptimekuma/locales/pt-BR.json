@@ -1,0 +1,11 @@
+{
+  "plugin.uptime_kuma.description": "Informa cada execução a um monitor push do Uptime Kuma: no ar, ou fora do ar quando falha.",
+  "plugin.uptime_kuma.message.default": "{{report.name}}: {{run.status}}, {{run.rows}} linhas",
+  "plugin.uptime_kuma.message.label": "Mensagem",
+  "plugin.uptime_kuma.name": "Uptime Kuma",
+  "plugin.uptime_kuma.push_url.help": "A URL de um monitor push, como o Uptime Kuma mostra. O Rowbird acrescenta os parâmetros.",
+  "plugin.uptime_kuma.push_url.label": "URL de push",
+  "plugin.uptime_kuma.skipped_status.down": "Informar fora do ar",
+  "plugin.uptime_kuma.skipped_status.label": "Quando a condição pula uma execução",
+  "plugin.uptime_kuma.skipped_status.up": "Informar no ar"
+}

@@ -1,0 +1,11 @@
+{
+  "plugin.format.json.decimals.help": "Strings mantêm todos os dígitos; alguns programas perdem precisão ao ler números grandes.",
+  "plugin.format.json.decimals.label": "Decimais",
+  "plugin.format.json.decimals.number": "Como números",
+  "plugin.format.json.decimals.string": "Como strings",
+  "plugin.format.json.description": "Linhas como objetos JSON, para programas e APIs.",
+  "plugin.format.json.layout.array": "Um array",
+  "plugin.format.json.layout.label": "Estrutura",
+  "plugin.format.json.layout.ndjson": "Um objeto por linha (NDJSON)",
+  "plugin.format.json.name": "JSON"
+}

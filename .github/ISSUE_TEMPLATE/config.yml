@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/rowbird/rowbird/discussions
+    about: Ask how to do something or share an idea before opening a feature request.
+  - name: Security vulnerability
+    url: https://github.com/rowbird/rowbird/security/advisories/new
+    about: Report vulnerabilities privately. Never in a public issue.
