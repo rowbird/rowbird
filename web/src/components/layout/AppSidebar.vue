@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import BrandMark from './BrandMark.vue'
 import { ArrowUpCircle } from '@lucide/vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 
-import { api } from '@/api/client'
 
 import {
   Sidebar,
@@ -19,19 +18,22 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar'
+import { NEW_VERSION_POLL_MS, refreshNewVersion, useNewVersion } from '@/composables/useNewVersion'
 import { NAV_GROUPS, NAV_SETTINGS } from '@/router/nav'
 import { useSessionStore } from '@/stores/session'
 
 const route = useRoute()
 const session = useSessionStore()
 /** A newer release, shown to admins when the update check found one. */
-const newVersion = ref('')
+const newVersion = useNewVersion()
+let poll: ReturnType<typeof setInterval> | undefined
 
-onMounted(async () => {
+onMounted(() => {
   if (!session.hasRole('admin')) return
-  const { data } = await api.GET('/api/v1/system/about')
-  if (data?.update_available && data.latest_version) newVersion.value = data.latest_version
+  void refreshNewVersion()
+  poll = setInterval(() => void refreshNewVersion(), NEW_VERSION_POLL_MS)
 })
+onUnmounted(() => clearInterval(poll))
 
 function isActive(path: string) {
   return path === '/' ? route.path === '/' : route.path === path || route.path.startsWith(`${path}/`)
