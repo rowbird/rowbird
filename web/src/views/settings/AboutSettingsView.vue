@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useFormat } from '@/composables/useFormat'
+import { noteAbout } from '@/composables/useNewVersion'
 import { useSessionStore } from '@/stores/session'
 
 /** About (docs/spec/06-ui.md, "Settings"): the version, and the optional check for new releases. */
@@ -22,6 +23,7 @@ const about = ref<Schemas['About'] | null>(null)
 
 async function load() {
   about.value = unwrap(await api.GET('/api/v1/system/about'))
+  noteAbout(about.value)
 }
 
 onMounted(async () => {

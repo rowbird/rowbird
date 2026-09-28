@@ -278,9 +278,11 @@ func TestPermissionMatrix(t *testing.T) {
 			}
 			var opts []func(*http.Request)
 			if opID == "GetEvents" {
-				// The stream stays open; end it soon after the authorization answered.
+				// The stream stays open; end it soon after the authorization answered. The margin
+				// covers slow CI machines under the race detector, where the session lookup alone
+				// can take longer than a few milliseconds.
 				opts = append(opts, func(r *http.Request) {
-					ctx, cancel := context.WithTimeout(r.Context(), 20*time.Millisecond)
+					ctx, cancel := context.WithTimeout(r.Context(), 300*time.Millisecond)
 					t.Cleanup(cancel)
 					*r = *r.WithContext(ctx)
 				})

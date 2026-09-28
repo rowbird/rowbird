@@ -8,7 +8,7 @@ import AboutSettingsView from '../AboutSettingsView.vue'
 
 const about = {
   version: '1.2.0', commit: 'abc123', build_date: '2026-09-01', go_version: 'go1.27', platform: 'linux/amd64',
-  update_check_allowed: true, update_check_enabled: true, update_available: true, latest_version: 'v1.3.0',
+  update_check_allowed: true, update_check_enabled: true, update_available: true, latest_version: '1.3.0',
   release_url: 'https://github.com/rowbird/rowbird/releases/tag/v1.3.0', checked_at: '2026-09-25T00:00:00Z',
 }
 
@@ -27,7 +27,7 @@ describe('AboutSettingsView', () => {
     useSessionStore().me = { ...sampleMe }
     await vi.waitFor(() => expect(wrapper.find('[data-testid="about-version"]').exists()).toBe(true))
     expect(wrapper.find('[data-testid="about-version"]').text()).toBe('1.2.0')
-    expect(wrapper.find('[data-testid="update-available"]').text()).toContain('v1.3.0 is available')
+    expect(wrapper.find('[data-testid="update-available"]').text()).toContain('1.3.0 is available')
 
     await wrapper.find('[data-testid="update-check"]').trigger('click')
     await flush()

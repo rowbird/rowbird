@@ -3748,7 +3748,7 @@ components:
           description: The workspace setting (Settings update_check).
         latest_version:
           type: string
-          description: The latest release, once a check has succeeded.
+          description: The latest release, once a check has succeeded, without a "v" prefix (1.2.3), like the running version.
         release_url:
           type: string
         checked_at:

@@ -31,7 +31,7 @@ func TestCheck(t *testing.T) {
 			t.Fatal(err)
 		}
 		s := c.Status(e.Ctx)
-		if s.UpdateAvailable != tc.want || s.Latest != "v1.3.0" || s.CheckedAt == nil || s.ReleaseURL == "" {
+		if s.UpdateAvailable != tc.want || s.Latest != "1.3.0" || s.CheckedAt == nil || s.ReleaseURL == "" {
 			t.Fatalf("%s: %+v", tc.current, s)
 		}
 		if ua != "rowbird/"+tc.current {
