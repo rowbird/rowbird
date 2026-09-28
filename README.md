@@ -16,8 +16,6 @@
   <a href="https://github.com/rowbird/rowbird/releases">Releases</a>
 </p>
 
-<!-- TODO(launch): record docs/assets/rowbird.gif: connect a database, write a query with the
-     preview, schedule it with the cron builder, and the email arriving. -->
 <p align="center"><img src="docs/assets/rowbird.gif" alt="Rowbird: from a query to an email in a minute" width="800"></p>
 
 ## Quick start
