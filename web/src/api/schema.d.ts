@@ -2172,7 +2172,7 @@ export interface components {
             update_check_allowed: boolean;
             /** @description The workspace setting (Settings update_check). */
             update_check_enabled: boolean;
-            /** @description The latest release, once a check has succeeded. */
+            /** @description The latest release, once a check has succeeded, without a "v" prefix (1.2.3), like the running version. */
             latest_version?: string;
             release_url?: string;
             /** Format: date-time */

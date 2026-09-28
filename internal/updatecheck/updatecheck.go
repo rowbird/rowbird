@@ -186,11 +186,13 @@ func (c *Checker) Check(ctx context.Context) error {
 // Status returns the latest answer.
 func (c *Checker) Status(ctx context.Context) Status {
 	c.mu.Lock()
-	s := Status{Current: c.current, Allowed: c.allowed, Latest: c.latest, ReleaseURL: c.release, CheckedAt: c.checkedAt}
+	latest := c.latest
+	// Shown like the running version, which carries no "v" ("1.2.3").
+	s := Status{Current: c.current, Allowed: c.allowed, Latest: strings.TrimPrefix(latest, "v"), ReleaseURL: c.release, CheckedAt: c.checkedAt}
 	c.mu.Unlock()
 	s.Enabled = EnabledIn(ctx, c.store)
 	cur := canonical(c.current)
-	s.UpdateAvailable = s.Allowed && s.Enabled && cur != "" && s.Latest != "" && semver.Compare(s.Latest, cur) > 0
+	s.UpdateAvailable = s.Allowed && s.Enabled && cur != "" && latest != "" && semver.Compare(latest, cur) > 0
 	return s
 }
 
