@@ -90,8 +90,9 @@ func TestConformance(t *testing.T) {
 			{Name: "c_bin", Type: plugin.TypeBinary, Value: []byte{0, 255}},
 			{Name: "c_uuid", Type: plugin.TypeText, Value: "A0EEBC99-9C0B-4EF8-BB6D-6BB9BD380A11"},
 		},
-		// One statement, since two are refused: a cross join that counts billions of rows.
-		SlowSQL:   "SELECT COUNT_BIG(*) FROM sys.all_columns a CROSS JOIN sys.all_columns b CROSS JOIN sys.all_columns c",
+		// One statement, since two are refused. A recursive CTE runs row by row, so the optimizer
+		// cannot shortcut it the way it shortcuts COUNT over a cross join.
+		SlowSQL:   "WITH c(x) AS (SELECT CAST(1 AS bigint) UNION ALL SELECT x + 1 FROM c WHERE x < 1000000000) SELECT COUNT_BIG(*) FROM c OPTION (MAXRECURSION 0)",
 		ParamSQL:  "SELECT CAST(@p1 AS nvarchar(100))",
 		InsertSQL: "INSERT INTO rb_rows (n) VALUES (99)",
 		Errors: map[string]map[string]any{
